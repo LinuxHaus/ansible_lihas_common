@@ -2,5 +2,5 @@
 galaxy_info:
   author: lihas@lihas.de
 dependencies:
-  - name: lihas_ansible
+  - name: lihas-ansible
   - src: https://github.com/LinuxHaus/ansible-lihas-ansible.git
