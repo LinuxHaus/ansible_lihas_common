@@ -1,0 +1,4 @@
+---
+- name: lihas-ansible-lihas
+  src: https://github.com/LinuxHaus/ansible-lihas-ansible.git
+  version: origin/master

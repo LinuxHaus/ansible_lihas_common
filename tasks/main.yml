@@ -1,0 +1,39 @@
+---
+- name: deploy /etc/network/interfaces
+  template:
+    src: etc/network/interfaces.j2
+    dest: /etc/network/interfaces
+- name: protect /etc/network/interfaces on Proxmox/LXC
+  file:
+    path: /etc/network/.pve-ignore.interfaces
+    state: touch
+  when: ansible_virtualization_type == 'lxc'
+# repositories
+- name: enable buster-backports
+  template:
+    src: etc/apt/sources.list.d/buster-backports.list
+    dest: /etc/apt/sources.list.d/buster-backports.list
+- name: if wireguard is used, use from backports
+  copy:
+    src: etc/apt/preferences.d/wireguard.pref
+    dest: /etc/apt/preferences.d/wireguard.pref
+- name: install software
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - extrepo
+    - rsync
+    - screen
+  loop_control:
+    loop_var: item
+- name: extrepo enable lihas
+  command:
+    cmd: /usr/bin/extrepo enable lihas
+  changed_when: False
+- apt:
+    update_cache: True
+    cache_valid_time: 600
+
+# - debug:
+#     var: hostvars
