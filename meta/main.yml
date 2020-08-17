@@ -1,3 +1,6 @@
 ---
+galaxy_info:
+  author: lihas@lihas.de
 dependencies:
-  - { role: 'lihas_ansible' }
+  - name: lihas_ansible
+  - src: https://github.com/LinuxHaus/ansible-lihas-ansible.git
