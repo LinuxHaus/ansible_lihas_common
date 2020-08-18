@@ -10,7 +10,7 @@ iface {{ i.key }} inet {{ i.value.config_type }}
   address {{ i.value.address }}
 {%       endif %}
 {%       if i.value.pointopoint is defined %}
-  address {{ i.value.pointopoint }}
+  pointopoint {{ i.value.pointopoint }}
 {%       endif %}
 {%       if i.value.gateway is defined %}
   gateway {{ i.value.gateway }}
