@@ -3,11 +3,12 @@
   template:
     src: etc/network/interfaces.j2
     dest: /etc/network/interfaces
+  when: hostvars[inventory_hostname].network.interfaces is defined
 - name: protect /etc/network/interfaces on Proxmox/LXC
   file:
     path: /etc/network/.pve-ignore.interfaces
     state: touch
-  when: ansible_virtualization_type == 'lxc'
+  when: ansible_virtualization_type == 'lxc' and hostvars[inventory_hostname].network.interfaces is defined
 # repositories
 - name: enable buster-backports
   template:
