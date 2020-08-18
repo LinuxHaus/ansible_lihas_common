@@ -1,4 +1,7 @@
 ---
+- name: reset_apt_update
+  set_fact:
+    apt_update: False
 - name: deploy /etc/network/interfaces
   template:
     src: etc/network/interfaces.j2
