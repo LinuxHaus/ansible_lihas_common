@@ -20,6 +20,10 @@
   set_fact:
     apt_update: True
   when: result.changed == True
+- name: create /etc/apt/preferences.d
+  file:
+    state: directory
+    path: /etc/apt/preferences.d
 - name: if wireguard is used, use from backports
   copy:
     src: etc/apt/preferences.d/wireguard.pref
