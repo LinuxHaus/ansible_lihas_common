@@ -4,6 +4,7 @@
     src: etc/network/interfaces.j2
     dest: /etc/network/interfaces
   when: hostvars[inventory_hostname].network.interfaces is defined
+  register: result
 - name: protect /etc/network/interfaces on Proxmox/LXC
   file:
     path: /etc/network/.pve-ignore.interfaces
@@ -14,10 +15,28 @@
   template:
     src: etc/apt/sources.list.d/buster-backports.list
     dest: /etc/apt/sources.list.d/buster-backports.list
+  register: result
+- name: set_apt_update
+  set_fact:
+    apt_update: True
+  when: result.changed == True
 - name: if wireguard is used, use from backports
   copy:
     src: etc/apt/preferences.d/wireguard.pref
     dest: /etc/apt/preferences.d/wireguard.pref
+  register: result
+- name: set_apt_update
+  set_fact:
+    apt_update: True
+  when: result.changed == True
+- name: apt update
+  apt:
+    update_cache: True
+  when: apt_update == True
+- name: reset_apt_update
+  set_fact:
+    apt_update: False
+  when: apt_update == True
 - name: install software
   apt:
     name: "{{ item }}"
@@ -32,6 +51,19 @@
   command:
     cmd: /usr/bin/extrepo enable lihas
   changed_when: False
+  register: result
+- name: set_apt_update
+  set_fact:
+    apt_update: True
+  when: "Configuration enabled" in result.stdout
+- name: apt update
+  apt:
+    update_cache: True
+  when: apt_update == True
+- name: reset_apt_update
+  set_fact:
+    apt_update: False
+  when: apt_update == True
 - apt:
     update_cache: True
     cache_valid_time: 600
