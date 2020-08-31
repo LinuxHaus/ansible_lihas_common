@@ -52,6 +52,7 @@
     - extrepo
     - rsync
     - screen
+    - etckeeper
   loop_control:
     loop_var: item
 - name: extrepo enable lihas
