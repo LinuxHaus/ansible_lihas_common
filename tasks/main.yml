@@ -10,7 +10,7 @@
   register: result
 - name: protect /etc/network/interfaces on Proxmox/LXC
   copy:
-    path: /etc/network/.pve-ignore.interfaces
+    dest: /etc/network/.pve-ignore.interfaces
     src: /dev/null
   when: ansible_virtualization_type == 'lxc' and hostvars[inventory_hostname].network.interfaces is defined
 # repositories
