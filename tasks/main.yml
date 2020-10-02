@@ -1,4 +1,8 @@
 ---
+- name: include variables
+  include_role:
+    name: lihas-variables
+  when: configspaces is not defined
 - name: reset_apt_update
   set_fact:
     apt_update: False

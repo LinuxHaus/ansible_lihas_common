@@ -4,4 +4,4 @@ galaxy_info:
 dependencies:
   - name: lihas-variables
     src: https://github.com/LinuxHaus/ansible-lihas-variables.git
-allow_duplicates: false
+    tags: [never]
