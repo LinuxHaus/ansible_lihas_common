@@ -79,6 +79,38 @@
 - apt:
     update_cache: True
     cache_valid_time: 600
+- name: disable systemd-modules-load.service on lxc
+  systemd:
+    name: systemd-modules-load.service
+    masked: true
+  when: ansible_virtualization_type == 'lxc'
+- name: disable systemd-journald-audit.socket on lxc
+  systemd:
+    name: systemd-journald-audit.socket
+    masked: true
+  when: ansible_virtualization_type == 'lxc'
+- name: disable sys-kernel-config.mount on lxc
+  systemd:
+    name: sys-kernel-config.mount
+    masked: true
+  when: ansible_virtualization_type == 'lxc'
+- name: disable sys-kernel-debug.mount on lxc
+  systemd:
+    name: sys-kernel-debug.mount
+    masked: true
+  when: ansible_virtualization_type == 'lxc'
+- name: Set default locale to de_DE.UTF-8
+  debconf:
+    name: locales
+    question: locales/default_environment_locale
+    value: de_DE.UTF-8
+    vtype: select
+- name: Set to generate locales
+  debconf:
+    name: locales
+    question: locales/locales_to_be_generated
+    value: en_US.UTF-8 UTF-8, de_DE.UTF-8 UTF-8
+    vtype: multiselect
 
 # - debug:
 #     var: hostvars
