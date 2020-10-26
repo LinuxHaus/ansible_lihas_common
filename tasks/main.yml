@@ -29,7 +29,7 @@
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: result.changed is True
+  when: result.changed == True
 - name: create /etc/apt/preferences.d
   file:
     state: directory
@@ -44,15 +44,15 @@
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: result.changed is True
+  when: result.changed == True
 - name: apt update
   apt:
     update_cache: True
-  when: apt_update is True
+  when: apt_update == True
 - name: reset_apt_update
   set_fact:
     apt_update: False
-  when: apt_update is True
+  when: apt_update == True
 - name: install software
   apt:
     name: "{{ item }}"
@@ -76,11 +76,11 @@
 - name: apt update
   apt:
     update_cache: True
-  when: apt_update is True
+  when: apt_update == True
 - name: reset_apt_update
   set_fact:
     apt_update: False
-  when: apt_update is True
+  when: apt_update == True
 - name: Update apt cache
   apt:
     update_cache: True

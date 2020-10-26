@@ -1,4 +1,5 @@
 ---
 - hosts: '*'
-  role: lihas_common
+  roles:
+    - lihas_common
 ...
