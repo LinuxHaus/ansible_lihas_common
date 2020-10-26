@@ -1,7 +1,7 @@
 ---
 - name: include variables
   include_role:
-    name: lihas-variables
+    name: lihas_variables
   when: configspaces is not defined
 - name: reset_apt_update
   set_fact:
@@ -29,7 +29,7 @@
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: result.changed == True
+  when: result.changed
 - name: create /etc/apt/preferences.d
   file:
     state: directory
@@ -44,15 +44,15 @@
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: result.changed == True
+  when: result.changed
 - name: apt update
   apt:
     update_cache: True
-  when: apt_update == True
+  when: apt_update
 - name: reset_apt_update
   set_fact:
     apt_update: False
-  when: apt_update == True
+  when: apt_update
 - name: install software
   apt:
     name: "{{ item }}"
@@ -76,11 +76,11 @@
 - name: apt update
   apt:
     update_cache: True
-  when: apt_update == True
+  when: apt_update
 - name: reset_apt_update
   set_fact:
     apt_update: False
-  when: apt_update == True
+  when: apt_update
 - name: Update apt cache
   apt:
     update_cache: True
