@@ -1,7 +1,15 @@
 ---
 galaxy_info:
   author: lihas@lihas.de
+  description: common tasks for possibly all installations
+  license: GPL-3.0-or-later
+  galaxy_tags: []
+  min_ansible_version: 2.9
+  platforms:
+    - name: Debian
+      versions:
+      - all
 dependencies:
-  - name: lihas-variables
+  - name: lihas_variables
     src: https://github.com/LinuxHaus/ansible-lihas-variables.git
     tags: [never]

@@ -10,44 +10,49 @@
   template:
     src: etc/network/interfaces.j2
     dest: /etc/network/interfaces
+    mode: 0644
   when: hostvars[inventory_hostname].network.interfaces is defined
   register: result
 - name: protect /etc/network/interfaces on Proxmox/LXC
   copy:
     dest: /etc/network/.pve-ignore.interfaces
     src: /dev/null
+    mode: 0644
   when: ansible_virtualization_type == 'lxc' and hostvars[inventory_hostname].network.interfaces is defined
 # repositories
 - name: enable buster-backports
   template:
     src: etc/apt/sources.list.d/buster-backports.list
     dest: /etc/apt/sources.list.d/buster-backports.list
+    mode: 0644
   register: result
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: result.changed == True
+  when: result.changed is True
 - name: create /etc/apt/preferences.d
   file:
     state: directory
     path: /etc/apt/preferences.d
+    mode: 0755
 - name: if wireguard is used, use from backports
   copy:
     src: etc/apt/preferences.d/wireguard.pref
     dest: /etc/apt/preferences.d/wireguard.pref
+    mode: 0644
   register: result
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: result.changed == True
+  when: result.changed is True
 - name: apt update
   apt:
     update_cache: True
-  when: apt_update == True
+  when: apt_update is True
 - name: reset_apt_update
   set_fact:
     apt_update: False
-  when: apt_update == True
+  when: apt_update is True
 - name: install software
   apt:
     name: "{{ item }}"
@@ -71,12 +76,13 @@
 - name: apt update
   apt:
     update_cache: True
-  when: apt_update == True
+  when: apt_update is True
 - name: reset_apt_update
   set_fact:
     apt_update: False
-  when: apt_update == True
-- apt:
+  when: apt_update is True
+- name: Update apt cache
+  apt:
     update_cache: True
     cache_valid_time: 600
 - name: disable systemd-modules-load.service on lxc
