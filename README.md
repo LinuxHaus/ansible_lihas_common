@@ -1,4 +1,4 @@
-# ansible-lihas-common
+# ansible_lihas_common
 Do basic setup common to all our installations
 
 ## Requirements
