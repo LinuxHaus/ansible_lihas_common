@@ -117,6 +117,11 @@
     question: locales/locales_to_be_generated
     value: en_US.UTF-8 UTF-8, de_DE.UTF-8 UTF-8
     vtype: multiselect
+- name: mark role lihas_common done
+  set_fact:
+    role_done_lihas_common: true
+  when: role_done_lihas_common is not defined
+
 
 # - debug:
 #     var: hostvars
