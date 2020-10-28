@@ -7,7 +7,7 @@ To run solo: `ansible-galaxy install -r requirements.yml`
 
 ## Dependencies
 
-* lihas-variables
+* lihas_variables
 
 ## Example Playbook
 
