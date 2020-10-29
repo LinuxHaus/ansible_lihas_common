@@ -62,6 +62,7 @@
     - rsync
     - screen
     - etckeeper
+    - vim
   loop_control:
     loop_var: item
 - name: extrepo enable lihas
