@@ -105,11 +105,11 @@
     name: sys-kernel-debug.mount
     masked: true
   when: ansible_virtualization_type == 'lxc'
-- name: Set default locale to de_DE.UTF-8
+- name: Set default locale to en_US.UTF-8
   debconf:
     name: locales
     question: locales/default_environment_locale
-    value: de_DE.UTF-8
+    value: en_US.UTF-8
     vtype: select
 - name: Set to generate locales
   debconf:
