@@ -1,0 +1,8 @@
+---
+- name: combine host entry
+  set_fact:
+    HOSTENTRY: "{{ hostentry }} {{ name }}"
+- name: combine host entry
+  set_fact:
+    hostentry: "{{ HOSTENTRY }}"
+...

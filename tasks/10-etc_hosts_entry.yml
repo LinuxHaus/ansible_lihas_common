@@ -1,0 +1,19 @@
+---
+- name: reset host entry
+  set_fact:
+    hostentry: ""
+- name: reset host entry
+  set_fact:
+    HOSTENTRY: ""
+- name: combine host entry
+  include: 10-etc_hosts_entry_name.yml
+  loop: "{{ hostvars[inventory_hostname][configgroup]['config']['hosts'][ip] }}"
+  loop_control:
+    loop_var: name
+- name: "/etc/hosts {{ ip }}"
+  lineinfile:
+    path: "/etc/hosts"
+    state: present
+    regexp: "{{ ip }}[ \t]+{{ hostentry }}"
+    line: "{{ ip }}\t{{ hostentry }}"
+...
