@@ -1,4 +1,6 @@
 ---
 - name: reconfigure locales
   command: dpkg-reconfigure -f noninteractive locales
+- name: reconfigure tzdata
+  command: dpkg-reconfigure -f noninteractive tzdata
 ...

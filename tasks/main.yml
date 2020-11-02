@@ -22,6 +22,20 @@
     state: present
   loop: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
   notify: reconfigure locales
+- name: "Set tzdata area to {{ tzdata_areas | default('Europe') }}"
+  debconf:
+    name: tzdata
+    question: "tzdata/Areas"
+    vtype: select
+    value: "{{ tzdata_areas | default('Europe') }}"
+  notify: reconfigure tzdata
+- name: "Set tzdata zone to {{ tzdata_zones_europe | default('Berlin') }}"
+  debconf:
+    name: tzdata
+    question: "tzdata/Zones/Europe"
+    vtype: select
+    value: "{{ tzdata_zones_europe | default('Berlin') }}"
+  notify: reconfigure tzdata
 - name: deploy /etc/network/interfaces
   template:
     src: etc/network/interfaces.j2

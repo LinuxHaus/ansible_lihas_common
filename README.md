@@ -2,6 +2,7 @@
 Do basic setup common to all our installations
 
 * set locales
+* set timezone
 * setup additional repositories
 * disable obsolete services on lxc containers
 * remove 127.0.0.1-entry from /etc/hosts as this collides e.g. with proxmox-ve
@@ -41,6 +42,8 @@ locales_default_environment_locale: de_DE.UTF-8
 locales_locales_to_be_generated:
   - de_DE.UTF-8 UTF-8
   - en_US.UTF-8 UTF-8
+tzdata_areas: Europe
+tzdata_zones_europe: Berlin
 XY:
   config:
     hosts:
