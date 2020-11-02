@@ -6,6 +6,22 @@
 - name: reset_apt_update
   set_fact:
     apt_update: False
+- name: "Set default locale to {{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
+  lineinfile:
+    dest: "/etc/default/locale"
+    regexp: "^LANG="
+    line: "LANG={{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
+  notify: reconfigure locales
+- name: "Set to generate locales {{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
+  lineinfile:
+    mode: 0644
+    path: /etc/locale.gen
+    line: '{{ item }} \2'
+    regexp: "^(# |){{ item }} (.*)"
+    backrefs: True
+    state: present
+  loop: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
+  notify: reconfigure locales
 - name: deploy /etc/network/interfaces
   template:
     src: etc/network/interfaces.j2
@@ -25,6 +41,11 @@
   loop: "{{ configspaces }}"
   loop_control:
     loop_var: configgroup
+- name: remove 127.0.1.1 from /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    state: absent
+    regexp: '^127\.0\.1\.1'
 # repositories
 - name: enable buster-backports
   template:
@@ -111,23 +132,10 @@
     name: sys-kernel-debug.mount
     masked: true
   when: ansible_virtualization_type == 'lxc'
-- name: Set default locale to de_DE.UTF-8
-  debconf:
-    name: locales
-    question: locales/default_environment_locale
-    value: de_DE.UTF-8
-    vtype: select
-- name: Set to generate locales
-  debconf:
-    name: locales
-    question: locales/locales_to_be_generated
-    value: en_US.UTF-8 UTF-8, de_DE.UTF-8 UTF-8
-    vtype: multiselect
 - name: mark role lihas_common done
   set_fact:
     role_done_lihas_common: true
   when: role_done_lihas_common is not defined
-
 
 # - debug:
 #     var: hostvars

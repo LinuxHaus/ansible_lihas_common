@@ -1,9 +1,20 @@
 # ansible_lihas_common
 Do basic setup common to all our installations
 
+* set locales
+* setup additional repositories
+* disable obsolete services on lxc containers
+* remove 127.0.0.1-entry from /etc/hosts as this collides e.g. with proxmox-ve
+* can setup /etc/host entries
+* can setup /etc/network/interfaces
+
 ## Requirements
 
-To run solo: `ansible-galaxy install -r requirements.yml`
+To run solo:
+```
+ansible-galaxy install -r requirements.yml
+ansible-playbook -i localhost, common.yml
+```
 
 ## Dependencies
 
@@ -19,13 +30,17 @@ To run solo: `ansible-galaxy install -r requirements.yml`
 ```
 ## Variables
 * X.config.hosts.IP[]
-    * X: string
+    * X: string, use host or groupname
     * IP: ip-address
     * []: list of names
 * X.config.network
     * if present, overwrite /etc/network/interfaces, supports bridges, vlans and interfaces as such
 ## Variables example
 ```
+locales_default_environment_locale: de_DE.UTF-8
+locales_locales_to_be_generated:
+  - de_DE.UTF-8 UTF-8
+  - en_US.UTF-8 UTF-8
 XY:
   config:
     hosts:
@@ -55,4 +70,4 @@ XY:
         vlan101:
           rawdevice: eth2
           vlanid: '101'
-``` 
+```
