@@ -1,0 +1,4 @@
+---
+- name: reconfigure locales
+  command: dpkg-reconfigure -f noninteractive locales
+...
