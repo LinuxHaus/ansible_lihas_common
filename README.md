@@ -8,6 +8,7 @@ Do basic setup common to all our installations
 * remove 127.0.0.1-entry from /etc/hosts as this collides e.g. with proxmox-ve
 * can setup /etc/host entries
 * can setup /etc/network/interfaces
+* installs aptitude etckeeper extrepo needrestart rsync screen etckeeper tzdata vim
 
 ## Requirements
 

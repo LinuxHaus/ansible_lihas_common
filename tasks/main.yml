@@ -99,10 +99,14 @@
     name: "{{ item }}"
     state: present
   loop:
+    - aptitude
+    - etckeeper
     - extrepo
+    - needrestart
     - rsync
     - screen
-    - etckeeper
+    - tzdata
+    - vim
   loop_control:
     loop_var: item
 - name: extrepo enable lihas
