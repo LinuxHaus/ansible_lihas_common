@@ -12,4 +12,5 @@ galaxy_info:
 dependencies:
   - name: lihas_variables
     src: https://github.com/LinuxHaus/ansible_lihas_variables.git
+    version: origin/master
     tags: [never]
