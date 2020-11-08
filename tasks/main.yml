@@ -12,6 +12,7 @@
     regexp: "^LANG="
     line: "LANG={{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
   notify: reconfigure locales
+  when: ansible_distribution == "Debian"
 - name: "Set to generate locales {{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
   lineinfile:
     mode: 0644
@@ -22,6 +23,7 @@
     state: present
   loop: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
   notify: reconfigure locales
+  when: ansible_distribution == "Debian"
 - name: "Set tzdata area to {{ tzdata_areas | default('Europe') }}"
   debconf:
     name: tzdata
@@ -29,6 +31,7 @@
     vtype: select
     value: "{{ tzdata_areas | default('Europe') }}"
   notify: reconfigure tzdata
+  when: ansible_distribution == "Debian"
 - name: "Set tzdata zone to {{ tzdata_zones_europe | default('Berlin') }}"
   debconf:
     name: tzdata
@@ -36,19 +39,20 @@
     vtype: select
     value: "{{ tzdata_zones_europe | default('Berlin') }}"
   notify: reconfigure tzdata
+  when: ansible_distribution == "Debian"
 - name: deploy /etc/network/interfaces
   template:
     src: etc/network/interfaces.j2
     dest: /etc/network/interfaces
     mode: 0644
-  when: hostvars[inventory_hostname].network.interfaces is defined
+  when: hostvars[inventory_hostname].network.interfaces is defined and ansible_distribution == "Debian"
   register: result
 - name: protect /etc/network/interfaces on Proxmox/LXC
   copy:
     dest: /etc/network/.pve-ignore.interfaces
     src: /dev/null
     mode: 0644
-  when: ansible_virtualization_type == 'lxc' and hostvars[inventory_hostname].network.interfaces is defined
+  when: ansible_virtualization_type == 'lxc' and hostvars[inventory_hostname].network.interfaces is defined and ansible_distribution == "Debian"
 # /etc/hosts
 - name: add lines to /etc/hosts
   include: tasks/10-etc_hosts.yml
@@ -61,12 +65,23 @@
     state: absent
     regexp: '^127\.0\.1\.1'
 # repositories
+- name: remove obsolete /etc/apt/sources.list.d/lihas.list
+  file:
+    state: absent
+    path: /etc/apt/sources.list.d/lihas.list
+  register: result
+  when: ansible_distribution_release == "buster"
+- name: set_apt_update
+  set_fact:
+    apt_update: True
+  when: result.changed
 - name: enable buster-backports
   template:
     src: etc/apt/sources.list.d/buster-backports.list
     dest: /etc/apt/sources.list.d/buster-backports.list
     mode: 0644
   register: result
+  when: ansible_distribution_release == "buster"
 - name: set_apt_update
   set_fact:
     apt_update: True
@@ -82,6 +97,7 @@
     dest: /etc/apt/preferences.d/wireguard.pref
     mode: 0644
   register: result
+  when: ansible_distribution_release == "buster"
 - name: set_apt_update
   set_fact:
     apt_update: True
@@ -101,7 +117,6 @@
   loop:
     - aptitude
     - etckeeper
-    - extrepo
     - needrestart
     - rsync
     - screen
@@ -109,15 +124,26 @@
     - vim
   loop_control:
     loop_var: item
+  when: ansible_distribution == "Debian"
+- name: install software
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - extrepo
+  loop_control:
+    loop_var: item
+  when: ansible_distribution_release == "buster"
 - name: extrepo enable lihas
   command:
     cmd: /usr/bin/extrepo enable lihas
   changed_when: False
   register: result
+  when: ansible_distribution_release == "buster"
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: '"repository already existed" not in result.stdout'
+  when: '"repository already existed" not in result.stdout and ansible_distribution_release == "buster"'
 - name: apt update
   apt:
     update_cache: True
@@ -125,11 +151,12 @@
 - name: reset_apt_update
   set_fact:
     apt_update: False
-  when: apt_update
+  when: apt_update and ansible_distribution == "Debian"
 - name: Update apt cache
   apt:
     update_cache: True
     cache_valid_time: 600
+  when: ansible_distribution == "Debian"
 - name: disable systemd-modules-load.service on lxc
   systemd:
     name: systemd-modules-load.service
