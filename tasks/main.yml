@@ -110,13 +110,14 @@
   set_fact:
     apt_update: False
   when: apt_update
-- name: install software
+- name: install software general
   apt:
     name: "{{ item }}"
     state: present
   loop:
     - aptitude
     - etckeeper
+    - locales
     - needrestart
     - rsync
     - screen
@@ -125,7 +126,15 @@
   loop_control:
     loop_var: item
   when: ansible_distribution == "Debian"
-- name: install software
+- name: etc/needrestart/conf.d/90-needrestart-lxc.conf
+  copy:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    mode: 0644
+  loop:
+    - etc/needrestart/conf.d/90-needrestart-lxc.conf
+  when: ansible_virtualization_type == 'lxc'
+- name: install software buster only
   apt:
     name: "{{ item }}"
     state: present
