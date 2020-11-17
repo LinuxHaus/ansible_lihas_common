@@ -59,6 +59,7 @@
   loop: "{{ configspaces }}"
   loop_control:
     loop_var: configgroup
+  when: configspaces is defined
 - name: remove 127.0.1.1 from /etc/hosts
   lineinfile:
     path: /etc/hosts
