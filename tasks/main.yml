@@ -187,6 +187,11 @@
     name: sys-kernel-debug.mount
     masked: true
   when: ansible_virtualization_type == 'lxc'
+- name: disable systemd-remount-fs.service on lxc
+  systemd:
+    name: systemd-remount-fs.service
+    masked: true
+  when: ansible_virtualization_type == 'lxc'
 - name: mark role lihas_common done
   set_fact:
     role_done_lihas_common: true
