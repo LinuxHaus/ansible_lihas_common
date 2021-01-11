@@ -92,6 +92,14 @@
     state: directory
     path: /etc/apt/preferences.d
     mode: 0755
+- name: Update apt cache
+  block:
+    - apt:
+        update_cache: True
+  rescue:
+    - shell:
+        cmd: "rm -rf /var/lib/apt/lists/; LC_ALL=C apt-get update"
+  when: ansible_distribution == "Debian"
 - name: if wireguard is used, use from backports
   copy:
     src: etc/apt/preferences.d/wireguard.pref
