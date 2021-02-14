@@ -12,7 +12,7 @@
     regexp: "^LANG="
     line: "LANG={{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
   notify: reconfigure locales
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
 - name: "Set to generate locales {{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
   lineinfile:
     mode: 0644
@@ -23,7 +23,7 @@
     state: present
   loop: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
   notify: reconfigure locales
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
 - name: "Set tzdata area to {{ tzdata_areas | default('Europe') }}"
   debconf:
     name: tzdata
@@ -31,7 +31,7 @@
     vtype: select
     value: "{{ tzdata_areas | default('Europe') }}"
   notify: reconfigure tzdata
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
 - name: "Set tzdata zone to {{ tzdata_zones_europe | default('Berlin') }}"
   debconf:
     name: tzdata
@@ -39,20 +39,20 @@
     vtype: select
     value: "{{ tzdata_zones_europe | default('Berlin') }}"
   notify: reconfigure tzdata
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
 - name: deploy /etc/network/interfaces
   template:
     src: etc/network/interfaces.j2
     dest: /etc/network/interfaces
     mode: 0644
-  when: hostvars[inventory_hostname].network.interfaces is defined and ansible_distribution == "Debian"
+  when: hostvars[inventory_hostname].network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   register: result
 - name: protect /etc/network/interfaces on Proxmox/LXC
   copy:
     dest: /etc/network/.pve-ignore.interfaces
     src: /dev/null
     mode: 0644
-  when: ansible_virtualization_type == 'lxc' and hostvars[inventory_hostname].network.interfaces is defined and ansible_distribution == "Debian"
+  when: ansible_virtualization_type == 'lxc' and hostvars[inventory_hostname].network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
 # /etc/hosts
 - name: add lines to /etc/hosts
   include: tasks/10-etc_hosts.yml
@@ -99,7 +99,7 @@
   rescue:
     - shell:
         cmd: "rm -rf /var/lib/apt/lists/; LC_ALL=C apt-get update"
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
 - name: if wireguard is used, use from backports
   copy:
     src: etc/apt/preferences.d/wireguard.pref
@@ -126,6 +126,7 @@
   loop:
     - aptitude
     - etckeeper
+    - fail2ban
     - locales
     - needrestart
     - rsync
@@ -134,7 +135,7 @@
     - vim
   loop_control:
     loop_var: item
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
 - name: etc/needrestart/conf.d/90-needrestart-lxc.conf
   copy:
     src: "{{ item }}"
@@ -151,30 +152,30 @@
     - extrepo
   loop_control:
     loop_var: item
-  when: ansible_distribution_release == "buster"
+  when: ansible_distribution_release == "buster" or ansible_distribution == "Ubuntu"
 - name: extrepo enable lihas
   command:
     cmd: /usr/bin/extrepo enable lihas
   changed_when: False
   register: result
-  when: ansible_distribution_release == "buster"
+  when: ansible_distribution_release == "buster" or ansible_distribution == "Ubuntu"
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: '"repository already existed" not in result.stdout and ansible_distribution_release == "buster"'
+  when: '( ansible_distribution_release == "buster" or ansible_distribution == "Ubuntu" ) and "repository already existed" not in result.stdout'
 - name: apt update
   apt:
     update_cache: True
-  when: apt_update
+  when: apt_update and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
 - name: reset_apt_update
   set_fact:
     apt_update: False
-  when: apt_update and ansible_distribution == "Debian"
+  when: apt_update and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
 - name: Update apt cache
   apt:
     update_cache: True
     cache_valid_time: 600
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
 - name: disable systemd-modules-load.service on lxc
   systemd:
     name: systemd-modules-load.service
@@ -204,6 +205,42 @@
   set_fact:
     role_done_lihas_common: true
   when: role_done_lihas_common is not defined
+
+- name: find additional software packages
+  set_fact:
+    lihas_common_extra_packages: "{{ lihas_common_extra_packages | default([]) + hostvars[inventory_hostname][item]['config']['software']['debian'] | default([]) }}"
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['software']['debian'] is defined
+- name: install additional software for this host/group
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ lihas_common_extra_packages }}"
+  loop_control:
+    loop_var: item
+  when: ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" ) and lihas_common_extra_packages is defined
+- name: find addtional files/templates
+  set_fact:
+    lihas_common_extra_files: "{{ lihas_common_extra_files | default([]) + hostvars[inventory_hostname][item]['config']['files'] | default([]) }}"
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['files'] is defined
+- name: "copy additional files/templates: create directories"
+  file:
+    path: "/{{ item | dirname() }}"
+    state: directory
+  loop: "{{ lihas_common_extra_files | default([]) }}"
+  loop_control:
+    loop_var: item
+  when: lihas_common_extra_files is defined
+- name: copy additional files/templates
+  template:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    mode: 0644
+  loop: "{{ lihas_common_extra_files | default([]) }}"
+  loop_control:
+    loop_var: item
+  when: lihas_common_extra_files is defined
 
 # - debug:
 #     var: hostvars

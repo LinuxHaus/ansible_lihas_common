@@ -9,6 +9,8 @@ Do basic setup common to all our installations
 * can setup /etc/host entries
 * can setup /etc/network/interfaces
 * installs aptitude etckeeper extrepo needrestart rsync screen etckeeper tzdata vim
+* can install extra software listed in %.config.software.debian[]
+* can copy files/templates listed in %.config.files[]
 
 ## Requirements
 
@@ -74,4 +76,8 @@ XY:
         vlan101:
           rawdevice: eth2
           vlanid: '101'
+    software:
+      debian:
+        - lldpd
+    files: []
 ```
