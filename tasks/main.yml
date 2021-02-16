@@ -2,7 +2,6 @@
 - name: mark role lihas_common done
   set_fact:
     role_done_lihas_common: true
-  when: role_done_lihas_common is not defined
 - name: mark lihas_common done
   set_fact:
     lihas_common_done: true
