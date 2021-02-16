@@ -3,6 +3,10 @@
   include_role:
     name: lihas_variables
   when: configspaces is not defined
+- name: include lihas_syscall
+  include_role:
+    name: lihas_syscall
+  when: lihas_sysctl_done is not defined
 - name: reset_apt_update
   set_fact:
     apt_update: False
@@ -242,5 +246,7 @@
     loop_var: item
   when: lihas_common_extra_files is defined
 
-# - debug:
-#     var: hostvars
+- name: mark lihas_common done
+  set_fact:
+    lihas_common_done: true
+

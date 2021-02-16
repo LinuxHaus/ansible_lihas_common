@@ -14,3 +14,7 @@ dependencies:
     src: https://github.com/LinuxHaus/ansible_lihas_variables.git
     version: origin/master
     tags: [never]
+  - name: lihas_sysctl
+    src: https://github.com/LinuxHaus/ansible_lihas_sysctl.git
+    version: origin/master
+    tags: [never]
