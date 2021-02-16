@@ -249,7 +249,7 @@
     loop_var: item
   when: lihas_common_extra_files is defined
 
-- name: include lihas_syscall
+- name: include lihas_sysctl
   include_role:
-    name: lihas_syscall
+    name: lihas_sysctl
   when: lihas_sysctl_done is not defined
