@@ -63,7 +63,7 @@ iface {{ i.key }} inet {{ i.value.config_type }}
 {%       endif %}
 {%     endif %}
 {%     if i.value.config6_type is defined %}
-iface {{ i.key }} inet6 {{ i.value.config_type }}
+iface {{ i.key }} inet6 {{ i.value.config6_type }}
 {%       if i.value.address6 is defined %}
   address {{ i.value.address6 }}
 {%       endif %}
