@@ -55,7 +55,9 @@ iface {{ i.key }} inet {{ i.value.config_type }}
   bridge_maxwait 0
   bridge_stp     off
   bridge_fd      0
+{%           if hostvars[inventory_hostname].network.bridges[i.key].bridge_vlan_aware | default("yes")  == "yes" %}
   bridge_vlan_aware yes
+{%           endif %}
 {%         endif %}
 {%       endif %}
 {%       if hostvars[inventory_hostname].network.vlans[i.key] is defined %}
