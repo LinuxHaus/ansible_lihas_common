@@ -106,6 +106,7 @@
   rescue:
     - shell:
         cmd: "rm -rf /var/lib/apt/lists/; LC_ALL=C apt-get update"
+        warn: false
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
 - name: if wireguard is used, use from backports
   copy:
