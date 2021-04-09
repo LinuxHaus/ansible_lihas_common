@@ -62,6 +62,7 @@ iface {{ i.key }} inet {{ i.value.config_type }}
 {%       endif %}
 {%       if hostvars[inventory_hostname].network.vlans[i.key] is defined %}
   vlan-raw-device {{ hostvars[inventory_hostname].network.vlans[i.key].rawdevice }}
+  pre-up ip link add link {{ hostvars[inventory_hostname]['network']['vlans'][i.key].rawdevice }} name {{ i.key }} type vlan id {{ hostvars[inventory_hostname]['network']['vlans'][i.key].vlanid }} || true
 {%       endif %}
 {%     endif %}
 {%     if i.value.config6_type is defined %}
@@ -149,6 +150,7 @@ iface {{ i.key }} inet {{ i.value.config_type }}
 {%       endif %}
 {%       if hostvars[inventory_hostname][config]['config']['network']['vlans'][i.key] is defined %}
   vlan-raw-device {{ hostvars[inventory_hostname][config]['config']['network']['vlans'][i.key].rawdevice }}
+  pre-up ip link add link {{ hostvars[inventory_hostname][config]['config']['network']['vlans'][i.key].rawdevice }} name {{ i.key }} type vlan id {{ hostvars[inventory_hostname][config]['config']['network']['vlans'][i.key].vlanid }} || true
 {%       endif %}
 {%     endif %}
 {%     if i.value.config6_type is defined %}
