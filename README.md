@@ -60,6 +60,7 @@ XY:
           slaves:
             - eth1
       interfaces:
+        auto: allow-auto
         vmbr9999:
           config_type: static # static, manual, dhcp
           address: 10.10.255.2/24
