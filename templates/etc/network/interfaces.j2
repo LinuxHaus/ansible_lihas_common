@@ -5,7 +5,11 @@ iface lo inet loopback
 
 {% if hostvars[inventory_hostname] is defined %}
 {%   for i in hostvars[inventory_hostname].network.interfaces | default({}) | dict2items %}
+{%     if i.value.auto is defined %}
+{{ i.value.auto }} {{ i.key }}
+{%     else %}
 auto {{ i.key }}
+{%     endif %}
 {%     if i.value.config_type is defined %}
 iface {{ i.key }} inet {{ i.value.config_type }}
 {%       if i.value.address is defined %}
@@ -104,7 +108,11 @@ iface {{ i.key }} inet6 {{ i.value.config6_type }}
 
 {% for config in configspaces | default([]) %}
 {%   for i in hostvars[inventory_hostname][config]['config']['network']['interfaces'] | default({}) | dict2items %}
+{%       if i.value.auto is defined %}
+{{ i.value.auto }} {{ i.key }}
+{%       else %}
 auto {{ i.key }}
+{%       endif %}
 {%     if i.value.config_type is defined %}
 iface {{ i.key }} inet {{ i.value.config_type }}
 {%       if i.value.address is defined %}
