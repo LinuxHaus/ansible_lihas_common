@@ -16,7 +16,7 @@
 - name: "Set default locale to {{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
   lineinfile:
     dest: "/etc/default/locale"
-    regexp: "^LANG="
+    regexp: "LANG="
     line: "LANG={{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
   notify: reconfigure locales
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
