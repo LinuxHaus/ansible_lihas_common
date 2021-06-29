@@ -55,11 +55,11 @@ XY:
     users:
       "username":
         uid: 1234
+	comment: "Karl Koch"
 	group: primarygroup
-	groups: []
+	groups: group1,group2
 	home: /home/user
 	shell: /bin/bash
-	password: xy
     hosts:
       "192.168.0.1":
         - example.com
