@@ -1,0 +1,7 @@
+- name: create/modify group
+  group:
+    name: "{{ group }}"
+    gid: "{{ lihas_common_groups[group].gid }}"
+    state: "{{ lihas_common_groups[group].state | default('present') }}"
+  tags:
+    - groups

@@ -49,6 +49,17 @@ tzdata_areas: Europe
 tzdata_zones_europe: Berlin
 XY:
   config:
+    groups:
+      "groupname":
+	gid: 1234
+    users:
+      "username":
+        uid: 1234
+	group: primarygroup
+	groups: []
+	home: /home/user
+	shell: /bin/bash
+	password: xy
     hosts:
       "192.168.0.1":
         - example.com

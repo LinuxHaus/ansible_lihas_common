@@ -2,14 +2,20 @@
 - name: mark role lihas_common done
   set_fact:
     role_done_lihas_common: true
+  tags:
+    - variables
 - name: mark lihas_common done
   set_fact:
     lihas_common_done: true
+  tags:
+    - variables
 
 - name: include variables
   include_role:
     name: lihas_variables
   when: configspaces is not defined
+  tags:
+    - variables
 - name: reset_apt_update
   set_fact:
     apt_update: False
@@ -144,6 +150,8 @@
   loop_control:
     loop_var: item
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+  async: 60
+  poll: 1
 - name: etc/needrestart/conf.d/90-needrestart-lxc.conf
   copy:
     src: "{{ item }}"
@@ -227,6 +235,8 @@
   loop_control:
     loop_var: item
   when: ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" ) and lihas_common_extra_packages is defined
+  async: 60
+  poll: 1
 - name: find addtional files/templates
   set_fact:
     lihas_common_extra_files: "{{ lihas_common_extra_files | default([]) + hostvars[inventory_hostname][item]['config']['files'] | default([]) }}"
@@ -250,7 +260,24 @@
     loop_var: item
   when: lihas_common_extra_files is defined
 
+# create groups
+- name: "groups: find groups"
+  set_fact:
+    lihas_common_groups: "{{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] | default({}), recursive=True) }}"
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['groups'] is defined
+  tags:
+    - groups
+- name: "groups: include tasks/10-groups.yml"
+  include: tasks/10-groups.yml
+  loop: "{{ lihas_common_groups | flatten(levels=1) }}"
+  loop_control:
+    loop_var: group
+  tags:
+    - groups
+
 - name: include lihas_sysctl
   include_role:
     name: lihas_sysctl
   when: lihas_sysctl_done is not defined
+
