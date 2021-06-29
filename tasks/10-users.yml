@@ -1,0 +1,22 @@
+- name: create/modify user
+  user:
+    name: "{{ user }}"
+    uid: "{{ lihas_common_users[user].uid }}"
+    group: "{{ lihas_common_users[user].group | default(omit) }}"
+    shell: "{{ lihas_common_users[user].shell | default(omit) }}"
+    comment: "{{ lihas_common_users[user].comment | default(omit) }}"
+    home: "{{ lihas_common_users[user].home | default(omit) }}"
+    create_home: "{{ lihas_common_users[user].create_home | default(true) }}"
+    groups: "{{ lihas_common_users[user].groups | default(omit) }}"
+    state: "{{ lihas_common_users[user].state | default('present') }}"
+  tags:
+    - users
+- name: "home directory permissions in case we had previous content there"
+  file:
+    path: "{{ lihas_common_users[user].home | default('/home/' + user) }}"
+    state: directory
+    owner: "{{ user }}"
+    recurse: true
+  when: lihas_common_users[user].force_home_user | default(false)
+  tags:
+    - users

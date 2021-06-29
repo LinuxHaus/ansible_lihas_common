@@ -281,11 +281,27 @@
     - groups
 - name: "groups: include tasks/10-groups.yml"
   include: tasks/10-groups.yml
-  loop: "{{ lihas_common_groups | flatten(levels=1) }}"
+  loop: "{{ lihas_common_groups | default({}) | flatten(levels=1) }}"
   loop_control:
     loop_var: group
   tags:
     - groups
+
+# create users
+- name: "users: find users"
+  set_fact:
+    lihas_common_users: "{{ lihas_common_users | default({}) | combine(hostvars[inventory_hostname][item]['config']['users'] | default({}), recursive=True) }}"
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['users'] is defined
+  tags:
+    - users
+- name: "users: include tasks/10-users.yml"
+  include: tasks/10-users.yml
+  loop: "{{ lihas_common_users | default({}) | flatten(levels=1) }}"
+  loop_control:
+    loop_var: user
+  tags:
+    - users
 
 - name: include lihas_sysctl
   include_role:
