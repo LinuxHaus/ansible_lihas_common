@@ -59,7 +59,11 @@ iface {{ i.key }} inet {{ i.value.config_type }}
   bridge_ports none
 {%           endif %}
   bridge_maxwait 0
+{%           if hostvars[inventory_hostname].network.bridges[i.key].stp | default("yes")  == "yes" %}
+  bridge_stp     on
+{%           else %}
   bridge_stp     off
+{%           endif %}
   bridge_fd      0
 {%           if hostvars[inventory_hostname].network.bridges[i.key].bridge_vlan_aware | default("yes")  == "yes" %}
   bridge_vlan_aware yes
@@ -70,6 +74,9 @@ iface {{ i.key }} inet {{ i.value.config_type }}
   vlan-raw-device {{ hostvars[inventory_hostname].network.vlans[i.key].rawdevice }}
   pre-up ip link add link {{ hostvars[inventory_hostname]['network']['vlans'][i.key].rawdevice }} name {{ i.key }} type vlan id {{ hostvars[inventory_hostname]['network']['vlans'][i.key].vlanid }} || true
 {%       endif %}
+{%       for extra in i.value.extra | default([]) %}
+  {{ extra }}
+{%       endfor %}
 {%     endif %}
 {%     if i.value.config6_type is defined %}
 iface {{ i.key }} inet6 {{ i.value.config6_type }}
@@ -153,7 +160,12 @@ iface {{ i.key }} inet {{ i.value.config_type }}
   bridge_ports none
 {%           endif %}
   bridge_maxwait 0
+{%           if hostvars[inventory_hostname][config]['config']['network']['bridges'][i.key].stp | default("yes")  == "yes" %}
+  bridge_stp     on
+{%           else %}
   bridge_stp     off
+{%           endif %}
+  bridge_stp     on
   bridge_fd      0
   bridge_vlan_aware yes
 {%         endif %}
@@ -194,6 +206,9 @@ iface {{ i.key }} inet {{ i.value.config_type }}
   post-down {{ cmd }}
 {%         endfor %}
 {%       endif %}
+{%       for extra in i.value.extra | default([]) %}
+  {{ extra }}
+{%       endfor %}
 {%     endif %}
 
 {%   endfor %}

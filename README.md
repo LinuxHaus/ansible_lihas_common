@@ -77,6 +77,8 @@ XY:
           address: 10.10.255.2/24
           up:
             - "ip route add 10.0.0.0/8 via 10.10.255.254 || true"
+	  extra:
+            - "anything"
         eth0:
           config_type: static # static, manual, dhcp
           address: 10.10.0.242/24
