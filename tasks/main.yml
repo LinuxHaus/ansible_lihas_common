@@ -257,6 +257,8 @@
     lihas_common_extra_files: "{{ lihas_common_extra_files | default([]) + hostvars[inventory_hostname][item]['config']['files'] | default([]) }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['files'] is defined
+  tags:
+    - templates
 - name: "copy additional files/templates: create directories"
   file:
     path: "/{{ item | dirname() }}"
@@ -265,6 +267,8 @@
   loop_control:
     loop_var: item
   when: lihas_common_extra_files is defined
+  tags:
+    - templates
 - name: copy additional files/templates
   template:
     src: "{{ item }}"
@@ -274,6 +278,8 @@
   loop_control:
     loop_var: item
   when: lihas_common_extra_files is defined
+  tags:
+    - templates
 
 # create groups
 - name: "groups: find groups"
