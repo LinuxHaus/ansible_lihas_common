@@ -60,12 +60,16 @@
     mode: 0644
   when: hostvars[inventory_hostname].network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   register: result
+  tags:
+    - network
 - name: protect /etc/network/interfaces on Proxmox/LXC
   copy:
     dest: /etc/network/.pve-ignore.interfaces
     src: /dev/null
     mode: 0644
   when: ansible_virtualization_type == 'lxc' and hostvars[inventory_hostname].network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
+  tags:
+    - network
 # /etc/hosts
 - name: add lines to /etc/hosts
   include: tasks/10-etc_hosts.yml
