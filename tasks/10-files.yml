@@ -1,0 +1,26 @@
+---
+- name: create directories with permissions
+  file:
+    path: "/{{ item }}"
+    mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(664) }}"
+    owner: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['owner'] | default('root') }}"
+    group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
+    state: directory
+  loop: "{{ lihas_common_extra_files_with_perms[filegroupid]['directories'] | default([]) }}"
+  loop_control:
+    loop_var: item
+  tags:
+    - templatesperms
+- name: copy additional files/templates with permissions
+  template:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(664) }}"
+    owner: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['owner'] | default('root') }}"
+    group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
+  loop: "{{ lihas_common_extra_files_with_perms[filegroupid]['files'] | default([]) }}"
+  loop_control:
+    loop_var: item
+  tags:
+    - templatesperms
+...

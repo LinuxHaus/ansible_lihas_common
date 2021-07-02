@@ -281,6 +281,22 @@
   tags:
     - templates
 
+- name: find addtional files/templates with permissions
+  set_fact:
+    lihas_common_extra_files_with_perms: "{{ hostvars[inventory_hostname][item]['config']['fileswithpermissions'] | default([]) }}"
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['fileswithpermissions'] is defined
+  tags:
+    - templatesperms
+- name: "files: include tasks/10-files.yml"
+  include: tasks/10-files.yml
+  loop: "{{ lihas_common_extra_files_with_perms | default([]) }}"
+  loop_control:
+    loop_var: filegroup
+    index_var: filegroupid
+  tags:
+    - templatesperms
+
 # create groups
 - name: "groups: find groups"
   set_fact:

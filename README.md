@@ -39,6 +39,14 @@ ansible-playbook -i localhost, common.yml
     * []: list of names
 * X.config.network
     * if present, overwrite /etc/network/interfaces, supports bridges, vlans and interfaces as such
+* X.config.fileswithpermissions.[].files: []
+    * files to copy
+* X.config.fileswithpermissions.[].directories: []
+    * directories to create
+* X.config.fileswithpermissions.[].perms.owner:
+* X.config.fileswithpermissions.[].perms.group:
+* X.config.fileswithpermissions.[].perms.mode:
+    * owner, group, mode (octal or quoted)
 ## Variables example
 ```
 locales_default_environment_locale: de_DE.UTF-8
