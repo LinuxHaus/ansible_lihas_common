@@ -175,7 +175,7 @@
   loop:
     - etc/needrestart/conf.d/90-needrestart-lxc.conf
   when: ansible_virtualization_type == 'lxc'
-- name: install software buster only
+- name: install software buster/bullseye/Ubuntu only
   apt:
     name: "{{ item }}"
     state: present
@@ -183,17 +183,17 @@
     - extrepo
   loop_control:
     loop_var: item
-  when: ansible_distribution_release == "buster" or ansible_distribution == "Ubuntu"
+  when: ansible_distribution_release == "buster" or ansible_distribution == "bullseye" or ansible_distribution == "Ubuntu"
 - name: extrepo enable lihas
   command:
     cmd: /usr/bin/extrepo enable lihas
   changed_when: False
   register: result
-  when: ansible_distribution_release == "buster" or ansible_distribution == "Ubuntu"
+  when: ansible_distribution_release == "buster" or ansible_distribution == "bullseye" or ansible_distribution == "Ubuntu"
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: '( ansible_distribution_release == "buster" or ansible_distribution == "Ubuntu" ) and "repository already existed" not in result.stdout'
+  when: '( ansible_distribution_release == "buster" or ansible_distribution == "bullseye" or ansible_distribution == "Ubuntu" ) and "repository already existed" not in result.stdout'
 - name: apt update
   apt:
     update_cache: True
