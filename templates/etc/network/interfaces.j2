@@ -61,7 +61,9 @@ iface {{ i.key }} inet {{ i.value.config_type }}
   bridge_stp {{ hostvars[inventory_hostname].network.bridges[i.key].stp | default("off") }}
   bridge_fd      {{ hostvars[inventory_hostname].network.bridges[i.key].fd | default (0) }}
   bridge_maxwait {{ hostvars[inventory_hostname].network.bridges[i.key].maxwait | default (0) }}
+{%           if hostvars[inventory_hostname].network.bridges[i.key].vlan_aware | default ('yes') == 'yes' %}
   bridge_vlan_aware yes
+{%           endif %}
 {%         endif %}
 {%       endif %}
 {%       if hostvars[inventory_hostname].network.vlans[i.key] is defined %}
@@ -156,7 +158,9 @@ iface {{ i.key }} inet {{ i.value.config_type }}
   bridge_stp {{ hostvars[inventory_hostname][config]['config']['network']['bridges'][i.key].stp | default("off") }}
   bridge_fd      {{ hostvars[inventory_hostname][config]['config']['network']['bridges'][i.key].fd | default(0) }}
   bridge_maxwait {{ hostvars[inventory_hostname][config]['config']['network']['bridges'][i.key].maxwait | default (0) }}
+{%           if hostvars[inventory_hostname][config]['config']['network']['bridges'][i.key].vlan_aware | default ('yes') == 'yes' %}
   bridge_vlan_aware yes
+{%           endif %}
 {%         endif %}
 {%       endif %}
 {%       if hostvars[inventory_hostname][config]['config']['network']['vlans'][i.key] is defined %}
