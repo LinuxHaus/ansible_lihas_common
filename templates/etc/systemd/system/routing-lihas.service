@@ -1,0 +1,16 @@
+[Unit]
+Description=Extra routes
+After=network.target
+
+[Service]
+Type=oneshot
+SuccessExitStatus=2
+
+# %.config.routes:
+{% for i in lihas_routes | default({}) | dict2items %}
+ExecStart=/sbin/ip route add {{ i.key }} via {{ i.value.gateway }} metric {{ i.value.metric | default("10") }}
+{% endfor %}
+
+[Install]
+WantedBy=multi-user.target
+Alias=routing.service

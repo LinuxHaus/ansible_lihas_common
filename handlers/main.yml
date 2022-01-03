@@ -3,4 +3,10 @@
   command: dpkg-reconfigure -f noninteractive locales
 - name: reconfigure tzdata
   command: dpkg-reconfigure -f noninteractive tzdata
+- name: restart_routing-lihas
+  service:
+    name: routing-lihas
+    state: restarted
+  tags:
+    - routes
 ...

@@ -8,6 +8,7 @@ Do basic setup common to all our installations
 * remove 127.0.0.1-entry from /etc/hosts as this collides e.g. with proxmox-ve
 * can setup /etc/host entries
 * can setup /etc/network/interfaces
+* can setup additional routes via lihas-routes.service
 * installs aptitude etckeeper extrepo needrestart rsync screen etckeeper tzdata vim
 * can install extra software listed in %.config.software.debian[]
 * can copy files/templates listed in %.config.files[]
@@ -32,6 +33,16 @@ ansible-playbook -i localhost, common.yml
   role: lihas_common
 ...
 ```
+## Tags
+selectovly run only parts:
+* variables: source variables, always use thes when using tags
+* groups: create groups
+* users: create users
+* network: do /etc/network/interfaces
+* routes: do /etc/systemd/system/lihas-routes.service
+* templates: copy extra templates
+* templatesperms: copy extra templates with permissions
+
 ## Variables
 * X.config.hosts.IP[]
     * X: string, use host or groupname
@@ -39,6 +50,8 @@ ansible-playbook -i localhost, common.yml
     * []: list of names
 * X.config.network
     * if present, overwrite /etc/network/interfaces, supports bridges, vlans and interfaces as such
+* X.config.routes.'network/cidr'.gateway
+* X.config.routes.'network/cidr'.metric
 * X.config.fileswithpermissions.[].files: []
     * files to copy
 * X.config.fileswithpermissions.[].directories: []
@@ -98,6 +111,10 @@ XY:
         vlan101:
           rawdevice: eth2
           vlanid: '101'
+    routes:
+      10.0.0.0/8:
+        gateway: 192.168.4.1
+        metric: 100
     software:
       debian:
         - lldpd
