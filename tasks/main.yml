@@ -245,12 +245,6 @@
   when: hostvars[inventory_hostname][item]['config']['routes'] is defined
   tags:
     - routes
-- debug:
-    var: lihas_routes
-  when:
-    - lihas_routes is defined
-  tags:
-    - routes
 - name: "lihas-routes: template"
   template:
     src: "etc/systemd/system/routing-lihas.service"
