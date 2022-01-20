@@ -34,7 +34,7 @@ ansible-playbook -i localhost, common.yml
 ...
 ```
 ## Tags
-selectovly run only parts:
+selectivly run only parts:
 * variables: source variables, always use thes when using tags
 * groups: create groups
 * users: create users
