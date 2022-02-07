@@ -3,11 +3,13 @@
   set_fact:
     role_done_lihas_common: true
   tags:
+    - always
     - variables
 - name: mark lihas_common done
   set_fact:
     lihas_common_done: true
   tags:
+    - always
     - variables
 
 - name: include variables
@@ -15,6 +17,7 @@
     name: lihas_variables
   when: configspaces is not defined
   tags:
+    - always
     - variables
 - name: reset_apt_update
   set_fact:
@@ -53,12 +56,31 @@
     value: "{{ tzdata_zones_europe | default('Berlin') }}"
   notify: reconfigure tzdata
   when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
+
+- name: collect network entries from LIHASVARS
+  set_fact:
+    network: "{{ network | default({}) | combine( LIHASVARS.network | default({}) ) }}"
+  when: LIHASVARS.network is defined
+  tags:
+    - network
+- name: collect network entries from configspaces
+  set_fact:
+    network: "{{ network | default({}) | combine( hostvars[inventory_hostname][item]['config']['network'] ) }}"
+    cacheable: no
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['network'] is defined
+  tags:
+    - network
+- name: DEBUG network after %.config.network
+  debug:
+    var: hostvars
+    verbosity: 2
 - name: deploy /etc/network/interfaces
   template:
     src: etc/network/interfaces.j2
     dest: /etc/network/interfaces
     mode: 0644
-  when: hostvars[inventory_hostname].network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
+  when: network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   register: result
   tags:
     - network
@@ -67,7 +89,7 @@
     dest: /etc/network/.pve-ignore.interfaces
     src: /dev/null
     mode: 0644
-  when: ansible_virtualization_type == 'lxc' and hostvars[inventory_hostname].network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
+  when: ansible_virtualization_type == 'lxc' and network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   tags:
     - network
 # /etc/hosts
