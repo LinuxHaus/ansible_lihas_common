@@ -36,6 +36,7 @@ ansible-playbook -i localhost, common.yml
 ## Tags
 selectivly run only parts:
 * variables: source variables, always use thes when using tags
+* extrepo: install/use extrepo
 * groups: create groups
 * users: create users
 * network: do /etc/network/interfaces
