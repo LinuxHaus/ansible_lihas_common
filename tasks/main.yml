@@ -206,14 +206,16 @@
   loop_control:
     loop_var: item
   when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" or ansible_distribution == "Ubuntu"
-  tags: extrepo
+  tags:
+    - extrepo
 - name: extrepo enable lihas
   command:
     cmd: /usr/bin/extrepo enable lihas
   changed_when: False
   register: result
   when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" or ansible_distribution == "Ubuntu"
-  tags: extrepo
+  tags:
+    - extrepo
 - name: set_apt_update
   set_fact:
     apt_update: True
