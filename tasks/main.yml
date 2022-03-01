@@ -59,13 +59,13 @@
 
 - name: collect network entries from LIHASVARS
   set_fact:
-    network: "{{ network | default({}) | combine( LIHASVARS.network | default({}) ) }}"
+    network: "{{ network | default({}) | combine( LIHASVARS.network | default({}), recursive=True, list_merge='append_rp' ) }}"
   when: LIHASVARS.network is defined
   tags:
     - network
 - name: collect network entries from configspaces
   set_fact:
-    network: "{{ network | default({}) | combine( hostvars[inventory_hostname][item]['config']['network'] ) }}"
+    network: "{{ network | default({}) | combine( hostvars[inventory_hostname][item]['config']['network'], recursive=True, list_merge='append_rp' ) }}"
     cacheable: no
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['network'] is defined
@@ -261,7 +261,7 @@
 
 - name: "lihas-routes: collect"
   set_fact:
-    lihas_routes: "{{ lihas_routes | default({}) | combine( hostvars[inventory_hostname][item]['config']['routes']) }}"
+    lihas_routes: "{{ lihas_routes | default({}) | combine( hostvars[inventory_hostname][item]['config']['routes'], recursive=True, list_merge='append_rp') }}"
     cacheable: no
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['routes'] is defined
@@ -354,7 +354,7 @@
 # create groups
 - name: "groups: find groups"
   set_fact:
-    lihas_common_groups: "{{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] | default({}), recursive=True) }}"
+    lihas_common_groups: "{{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] | default({}), recursive=True, list_merge='append_rp') }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['groups'] is defined
   tags:
@@ -370,7 +370,7 @@
 # create users
 - name: "users: find users"
   set_fact:
-    lihas_common_users: "{{ lihas_common_users | default({}) | combine(hostvars[inventory_hostname][item]['config']['users'] | default({}), recursive=True) }}"
+    lihas_common_users: "{{ lihas_common_users | default({}) | combine(hostvars[inventory_hostname][item]['config']['users'] | default({}), recursive=True, list_merge='append_rp') }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['users'] is defined
   tags:
