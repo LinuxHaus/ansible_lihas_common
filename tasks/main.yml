@@ -334,7 +334,7 @@
 
 - name: find addtional files/templates with permissions
   set_fact:
-    lihas_common_extra_files_with_perms: "{{ hostvars[inventory_hostname][item]['config']['fileswithpermissions'] | default([]) }}"
+    lihas_common_extra_files_with_perms: "{{ lihas_common_extra_files_with_perms | default([]) + hostvars[inventory_hostname][item]['config']['fileswithpermissions'] | default([]) }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['fileswithpermissions'] is defined
   tags:
@@ -384,4 +384,3 @@
   include_role:
     name: lihas_sysctl
   when: lihas_sysctl_done is not defined
-
