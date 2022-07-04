@@ -6,7 +6,7 @@
   set_fact:
     HOSTENTRY: ""
 - name: combine host entry
-  include: 10-etc_hosts_entry_name.yml
+  include_tasks: 10-etc_hosts_entry_name.yml
   loop: "{{ hostvars[inventory_hostname][configgroup]['config']['hosts'][ip] }}"
   loop_control:
     loop_var: name

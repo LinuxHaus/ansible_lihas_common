@@ -1,6 +1,6 @@
 [Unit]
 Description=Extra routes
-After=network.target
+After=networking.service
 
 [Service]
 Type=oneshot

@@ -13,7 +13,7 @@
     - variables
 
 - name: include variables
-  include_role:
+  import_role:
     name: lihas_variables
   when: configspaces is not defined
   tags:
@@ -94,7 +94,7 @@
     - network
 # /etc/hosts
 - name: add lines to /etc/hosts
-  include: tasks/10-etc_hosts.yml
+  include_tasks: tasks/10-etc_hosts.yml
   loop: "{{ configspaces }}"
   loop_control:
     loop_var: configgroup
@@ -183,7 +183,7 @@
     - tzdata
     - vim
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  async: 60
+  async: 120
   poll: 1
 - name: etc/needrestart/conf.d/90-needrestart-lxc.conf
   copy:
@@ -193,12 +193,12 @@
   loop:
     - etc/needrestart/conf.d/90-needrestart-lxc.conf
   when: ansible_virtualization_type == 'lxc'
-- name: install software buster/bullseye/Ubuntu only
+- name: install software buster/bullseye only
   apt:
     name:
     - extrepo
     state: present
-  when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" or ansible_distribution == "Ubuntu"
+  when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"
   tags:
     - extrepo
 - name: extrepo enable lihas
@@ -206,13 +206,13 @@
     cmd: /usr/bin/extrepo enable lihas
   changed_when: False
   register: result
-  when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" or ansible_distribution == "Ubuntu"
+  when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"
   tags:
     - extrepo
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: '( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" or ansible_distribution == "Ubuntu" ) and "repository already existed" not in result.stdout'
+  when: '( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" ) and "repository already existed" not in result.stdout'
   tags:
     - extrepo
 - name: apt update
@@ -231,27 +231,27 @@
   systemd:
     name: systemd-modules-load.service
     masked: true
-  when: ansible_virtualization_type == 'lxc'
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
 - name: disable systemd-journald-audit.socket on lxc
   systemd:
     name: systemd-journald-audit.socket
     masked: true
-  when: ansible_virtualization_type == 'lxc'
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
 - name: disable sys-kernel-config.mount on lxc
   systemd:
     name: sys-kernel-config.mount
     masked: true
-  when: ansible_virtualization_type == 'lxc'
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
 - name: disable sys-kernel-debug.mount on lxc
   systemd:
     name: sys-kernel-debug.mount
     masked: true
-  when: ansible_virtualization_type == 'lxc'
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
 - name: disable systemd-remount-fs.service on lxc
   systemd:
     name: systemd-remount-fs.service
     masked: true
-  when: ansible_virtualization_type == 'lxc'
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
 - name: mark role lihas_common done
   set_fact:
     role_done_lihas_common: true
@@ -299,7 +299,7 @@
     name: "{{ lihas_common_extra_packages }}"
     state: present
   when: ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" ) and lihas_common_extra_packages is defined
-  async: 60
+  async: 120
   poll: 1
 - name: find addtional files/templates
   set_fact:
@@ -338,7 +338,7 @@
   tags:
     - templatesperms
 - name: "files: include tasks/10-files.yml"
-  include: tasks/10-files.yml
+  include_tasks: tasks/10-files.yml
   loop: "{{ lihas_common_extra_files_with_perms | default([]) }}"
   loop_control:
     loop_var: filegroup
@@ -355,7 +355,7 @@
   tags:
     - groups
 - name: "groups: include tasks/10-groups.yml"
-  include: tasks/10-groups.yml
+  include_tasks: tasks/10-groups.yml
   loop: "{{ lihas_common_groups | default({}) | flatten(levels=1) }}"
   loop_control:
     loop_var: group
@@ -371,7 +371,7 @@
   tags:
     - users
 - name: "users: include tasks/10-users.yml"
-  include: tasks/10-users.yml
+  include_tasks: tasks/10-users.yml
   loop: "{{ lihas_common_users | default({}) | flatten(levels=1) }}"
   loop_control:
     loop_var: user
@@ -379,6 +379,6 @@
     - users
 
 - name: include lihas_sysctl
-  include_role:
+  import_role:
     name: lihas_sysctl
   when: lihas_sysctl_done is not defined
