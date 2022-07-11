@@ -53,6 +53,8 @@ selectivly run only parts:
     * if present, overwrite /etc/network/interfaces, supports bridges, vlans and interfaces as such
 * X.config.routes.'network/cidr'.gateway
 * X.config.routes.'network/cidr'.metric
+* X.config.extrepo: []
+    * extrepo Repositories to enable
 * X.config.fileswithpermissions.[].files: []
     * files to copy
 * X.config.fileswithpermissions.[].directories: []

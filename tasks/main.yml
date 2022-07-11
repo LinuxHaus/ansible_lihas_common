@@ -205,14 +205,34 @@
   command:
     cmd: /usr/bin/extrepo enable lihas
   changed_when: False
-  register: result
   when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"
+  tags:
+    - extrepo
+- name: extrepo enable Repositories
+  command:
+    cmd: /usr/bin/extrepo enable {{ item }}
+  changed_when: False
+  register: resultloop
+  with_list: "{{ lihas_extrepo }}"
+  when: lihas_extrepo is defined
+  tags:
+    - extrepo
+- name: debug resultloop
+  debug:
+    var: resultloop
+    verbosity: 1
+- name: extrepo Repositories to enable
+  set_fact:
+    lihas_extrepo: "{{ lihas_extrepo | default([]) + hostvars[inventory_hostname][item]['config']['extrepo'] }}"
+    cacheable: no
+  with_list: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['extrepo'] is defined
   tags:
     - extrepo
 - name: set_apt_update
   set_fact:
     apt_update: True
-  when: '( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" ) and "repository already existed" not in result.stdout'
+#  when: '( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" ) and "repository already existed" not in result.stdout'
   tags:
     - extrepo
 - name: apt update
@@ -288,6 +308,7 @@
   when: lihas_routes is defined
   tags:
     - routes
+
 
 - name: find additional software packages
   set_fact:
