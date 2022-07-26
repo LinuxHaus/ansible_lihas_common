@@ -8,7 +8,7 @@ galaxy_info:
   platforms:
     - name: Debian
       versions:
-      - all
+        - all
 dependencies:
   - name: lihas_sysctl
     src: https://github.com/LinuxHaus/ansible_lihas_sysctl.git
