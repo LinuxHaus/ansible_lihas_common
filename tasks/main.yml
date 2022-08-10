@@ -208,7 +208,21 @@
   when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"
   tags:
     - extrepo
-- name: extrepo enable Repositories
+- name: extrepo Repositories to enable
+  set_fact:
+    lihas_extrepo: "{{ lihas_extrepo | default([]) + hostvars[inventory_hostname][item]['config']['extrepo'] }}"
+    cacheable: no
+  with_list: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['extrepo'] is defined
+  tags:
+    - extrepo
+- name: debug lihas_extrepo
+  debug:
+    var: lihas_extrepo
+    verbosity: 1
+  tags:
+    - extrepo
+- name: extrepo enable extra Repositories
   command:
     cmd: /usr/bin/extrepo enable {{ item }}
   changed_when: False
@@ -221,12 +235,6 @@
   debug:
     var: resultloop
     verbosity: 1
-- name: extrepo Repositories to enable
-  set_fact:
-    lihas_extrepo: "{{ lihas_extrepo | default([]) + hostvars[inventory_hostname][item]['config']['extrepo'] }}"
-    cacheable: no
-  with_list: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['extrepo'] is defined
   tags:
     - extrepo
 - name: set_apt_update
