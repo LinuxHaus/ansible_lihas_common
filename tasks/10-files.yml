@@ -11,6 +11,7 @@
     loop_var: item
   tags:
     - templatesperms
+  become: yes
 - name: copy additional files/templates with permissions
   include_tasks: tasks/10-files-individual.yml
   with_dict: "{{ lihas_common_extra_files_with_perms[filegroupid]['files'] | default({}) }}"
@@ -18,4 +19,5 @@
     loop_var: file
   tags:
     - templatesperms
+  become: yes
 ...

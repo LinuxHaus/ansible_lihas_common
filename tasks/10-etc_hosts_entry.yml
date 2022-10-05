@@ -16,4 +16,5 @@
     state: present
     regexp: "{{ ip }}[ \t]+{{ hostentry }}"
     line: "{{ ip }}\t{{ hostentry }}"
+  become: yes
 ...

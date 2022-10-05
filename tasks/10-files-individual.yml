@@ -14,6 +14,7 @@
   register: resulttemplateperms
   tags:
     - templatesperms
+  become: yes
 - name: Debug resulttemplateperms
   debug:
     var: resulttemplateperms
@@ -27,4 +28,5 @@
   when: resulttemplateperms.changed and lihas_common_extra_files_with_perms[filegroupid]['command'] is defined
   tags:
     - templatesperms
+  become: yes
 ...

@@ -11,6 +11,7 @@
     state: "{{ lihas_common_users[user].state | default('present') }}"
   tags:
     - users
+  become: yes
 - name: "home directory permissions in case we had previous content there"
   file:
     path: "{{ lihas_common_users[user].home | default('/home/' + user) }}"
@@ -20,3 +21,4 @@
   when: lihas_common_users[user].force_home_user | default(false)
   tags:
     - users
+  become: yes
