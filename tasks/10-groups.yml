@@ -5,4 +5,4 @@
     state: "{{ lihas_common_groups[group].state | default('present') }}"
   tags:
     - groups
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"

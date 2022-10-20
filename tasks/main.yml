@@ -8,13 +8,25 @@
 - name: mark lihas_common done
   set_fact:
     lihas_common_done: true
+    cacheable: false
   tags:
     - always
     - variables
+- name: lihas_become init
+  set_fact:
+    lihas_become: "no"
 - name: check if become is necessary
   set_fact:
     lihas_become: "yes"
-  when: ansible_effective_user_id != "root"
+  when: ansible_effective_user_id != 0
+- name: "DEBUG: lihas_become"
+  debug:
+    var: lihas_become
+    verbosity: 1
+- name: "DEBUG: ansible_effective_user_id"
+  debug:
+    var: ansible_effective_user_id
+    verbosity: 1
 - name: include variables
   import_role:
     name: lihas_variables
@@ -32,7 +44,7 @@
     line: "LANG={{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
   notify: reconfigure locales
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: "Set to generate locales {{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
   lineinfile:
     mode: 0644
@@ -44,7 +56,7 @@
   loop: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
   notify: reconfigure locales
   when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: "Set tzdata area to {{ tzdata_areas | default('Europe') }}"
   debconf:
     name: tzdata
@@ -53,7 +65,7 @@
     value: "{{ tzdata_areas | default('Europe') }}"
   notify: reconfigure tzdata
   when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: "Set tzdata zone to {{ tzdata_zones_europe | default('Berlin') }}"
   debconf:
     name: tzdata
@@ -62,7 +74,7 @@
     value: "{{ tzdata_zones_europe | default('Berlin') }}"
   notify: reconfigure tzdata
   when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 
 - name: collect network entries from LIHASVARS
   set_fact:
@@ -91,7 +103,7 @@
   register: result
   tags:
     - network
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: protect /etc/network/interfaces on Proxmox/LXC
   copy:
     dest: /etc/network/.pve-ignore.interfaces
@@ -100,7 +112,7 @@
   when: ansible_virtualization_type == 'lxc' and network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   tags:
     - network
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 # /etc/hosts
 - name: add lines to /etc/hosts
   include_tasks: tasks/10-etc_hosts.yml
@@ -120,7 +132,7 @@
     path: /etc/apt/sources.list.d/lihas.list
   register: result
   when: ansible_distribution_release == "buster"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: set_apt_update
   set_fact:
     apt_update: True
@@ -132,7 +144,7 @@
     mode: 0644
   register: result
   when: ansible_distribution_release == "buster"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: set_apt_update
   set_fact:
     apt_update: True
@@ -144,7 +156,7 @@
     mode: 0644
   register: result
   when: ansible_distribution_release == "buster"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: set_apt_update
   set_fact:
     apt_update: True
@@ -154,7 +166,7 @@
     state: directory
     path: /etc/apt/preferences.d
     mode: 0755
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: Update apt cache
   block:
     - apt:
@@ -164,7 +176,7 @@
         cmd: "rm -rf /var/lib/apt/lists/; LC_ALL=C apt-get update"
         warn: false
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: if wireguard is used, use from backports
   copy:
     src: etc/apt/preferences.d/wireguard.pref
@@ -172,7 +184,7 @@
     mode: 0644
   register: result
   when: ansible_distribution_release == "buster"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: set_apt_update
   set_fact:
     apt_update: True
@@ -181,7 +193,7 @@
   apt:
     update_cache: True
   when: apt_update | default(False)
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: reset_apt_update
   set_fact:
     apt_update: False
@@ -201,7 +213,7 @@
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   async: 120
   poll: 1
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
   tags:
     - software
 - name: etc/needrestart/conf.d/90-needrestart-lxc.conf
@@ -212,7 +224,7 @@
   loop:
     - etc/needrestart/conf.d/90-needrestart-lxc.conf
   when: ansible_virtualization_type == 'lxc'
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: install software buster/bullseye only
   apt:
     name:
@@ -222,7 +234,7 @@
   tags:
     - extrepo
     - software
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: extrepo enable lihas
   command:
     cmd: /usr/bin/extrepo enable lihas
@@ -230,7 +242,7 @@
   when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"
   tags:
     - extrepo
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: extrepo Repositories to enable
   set_fact:
     lihas_extrepo: "{{ lihas_extrepo | default([]) + hostvars[inventory_hostname][item]['config']['extrepo'] }}"
@@ -239,14 +251,14 @@
   when: hostvars[inventory_hostname][item]['config']['extrepo'] is defined
   tags:
     - extrepo
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: debug lihas_extrepo
   debug:
     var: lihas_extrepo
     verbosity: 1
   tags:
     - extrepo
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: extrepo enable extra Repositories
   command:
     cmd: /usr/bin/extrepo enable {{ item }}
@@ -256,7 +268,7 @@
   when: lihas_extrepo is defined
   tags:
     - extrepo
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: debug resultloop
   debug:
     var: resultloop
@@ -273,7 +285,7 @@
   apt:
     update_cache: True
   when: apt_update | default (False)
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: reset_apt_update
   set_fact:
     apt_update: False
@@ -282,37 +294,37 @@
     update_cache: True
     cache_valid_time: 600
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: disable systemd-modules-load.service on lxc
   systemd:
     name: systemd-modules-load.service
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: disable systemd-journald-audit.socket on lxc
   systemd:
     name: systemd-journald-audit.socket
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: disable sys-kernel-config.mount on lxc
   systemd:
     name: sys-kernel-config.mount
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: disable sys-kernel-debug.mount on lxc
   systemd:
     name: sys-kernel-debug.mount
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: disable systemd-remount-fs.service on lxc
   systemd:
     name: systemd-remount-fs.service
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: mark role lihas_common done
   set_fact:
     role_done_lihas_common: true
@@ -336,14 +348,14 @@
   register: systemd
   tags:
     - routes
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: "lihas-routes: reload_systemd"
   systemd:
     daemon_reload: yes
   when: lihas_routes is defined and systemd.changed
   tags:
     - routes
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: "lihas-routes: service"
   service:
     name: routing-lihas
@@ -351,7 +363,7 @@
   when: lihas_routes is defined
   tags:
     - routes
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 
 
 - name: find additional software packages
@@ -366,7 +378,7 @@
   when: ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" ) and lihas_common_extra_packages is defined
   async: 120
   poll: 1
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
   tags:
     - software
 - name: find addtional files/templates
@@ -386,7 +398,7 @@
   when: lihas_common_extra_files is defined
   tags:
     - templates
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: copy additional files/templates
   template:
     src: "{{ item }}"
@@ -398,7 +410,7 @@
   when: lihas_common_extra_files is defined
   tags:
     - templates
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 
 - name: find addtional files/templates with permissions
   set_fact:

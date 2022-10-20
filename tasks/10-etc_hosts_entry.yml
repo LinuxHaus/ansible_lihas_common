@@ -16,5 +16,5 @@
     state: present
     regexp: "{{ ip }}[ \t]+{{ hostentry }}"
     line: "{{ ip }}\t{{ hostentry }}"
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 ...

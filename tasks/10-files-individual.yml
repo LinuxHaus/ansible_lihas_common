@@ -6,15 +6,15 @@
     - templatesperms 
 - name: copy additional files/templates with permissions
   template:
-    src: "{{ file.key }}"
-    dest: "/{{ file.key }}"
+    src: "{{ file }}"
+    dest: "/{{ file }}"
     mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(664) }}"
     owner: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['owner'] | default('root') }}"
     group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
   register: resulttemplateperms
   tags:
     - templatesperms
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 - name: Debug resulttemplateperms
   debug:
     var: resulttemplateperms
@@ -28,5 +28,5 @@
   when: resulttemplateperms.changed and lihas_common_extra_files_with_perms[filegroupid]['command'] is defined
   tags:
     - templatesperms
-  become: "{{lihas_become | default('no')}}"
+  become: "{{lihas_become}}"
 ...
