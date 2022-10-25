@@ -89,6 +89,8 @@ XY:
         - example.com
         - examle
     network:
+      interfaces_rename:
+	enp3s0: wan
       bridges:
         vmbr9999:
           bridge_type: linux # linux or ovs

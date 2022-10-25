@@ -4,109 +4,114 @@ auto lo
 iface lo inet loopback
 
 {% if hostvars[inventory_hostname] is defined %}
-{%   for i in hostvars[inventory_hostname].network.interfaces | default({}) | dict2items %}
-{%     if i.value.auto is defined %}
+{%   if hostvars[inventory_hostname].network is defined %}
+{%     for i in hostvars[inventory_hostname].network.interfaces_rename | default({}) | dict2items %}
+rename {{ i.key }}={{ i.value }}
+{%     endfor %}
+{%     for i in hostvars[inventory_hostname].network.interfaces | default({}) | dict2items %}
+{%       if i.value.auto is defined %}
 {{ i.value.auto }} {{ i.key }}
-{%     else %}
+{%       else %}
 auto {{ i.key }}
-{%     endif %}
-{%     if i.value.config_type is defined %}
+{%       endif %}
+{%       if i.value.config_type is defined %}
 iface {{ i.key }} inet {{ i.value.config_type }}
-{%       if i.value.address is defined %}
+{%         if i.value.address is defined %}
   address {{ i.value.address }}
-{%       endif %}
-{%       if i.value.pointopoint is defined %}
+{%         endif %}
+{%         if i.value.pointopoint is defined %}
   pointopoint {{ i.value.pointopoint }}
-{%       endif %}
-{%       if i.value.gateway is defined %}
+{%         endif %}
+{%         if i.value.gateway is defined %}
   gateway {{ i.value.gateway }}
-{%       endif %}
-{%       if i.value.mtu is defined %}
+{%         endif %}
+{%         if i.value.mtu is defined %}
   mtu {{ i.value.mtu }}
-{%       endif %}
-{%       if i.value.metric is defined %}
+{%         endif %}
+{%         if i.value.metric is defined %}
   metric {{ i.value.metric }}
-{%       endif %}
-{%       if i.value['dns-nameserver'] is defined %}
+{%         endif %}
+{%         if i.value['dns-nameserver'] is defined %}
   dns-nameserver {{ i.value['dns-nameserver'] }}
-{%       endif %}
-{%       if i.value.preup is defined %}
-{%         for cmd in i.value.preup | default([]) %}
+{%         endif %}
+{%         if i.value.preup is defined %}
+{%           for cmd in i.value.preup | default([]) %}
   pre-up {{ cmd }}
-{%         endfor %}
-{%       endif %}
-{%       if i.value.up is defined %}
-{%         for cmd in i.value.up | default([]) %}
+{%           endfor %}
+{%         endif %}
+{%         if i.value.up is defined %}
+{%           for cmd in i.value.up | default([]) %}
   up {{ cmd }}
-{%         endfor %}
-{%       endif %}
-{%       if i.value.down is defined %}
-{%         for cmd in i.value.down | default([]) %}
+{%           endfor %}
+{%         endif %}
+{%         if i.value.down is defined %}
+{%           for cmd in i.value.down | default([]) %}
   down {{ cmd }}
-{%         endfor %}
-{%       endif %}
-{%       if i.value.postdown is defined %}
-{%         for cmd in i.value.postdown | default([]) %}
+{%           endfor %}
+{%         endif %}
+{%         if i.value.postdown is defined %}
+{%           for cmd in i.value.postdown | default([]) %}
   post-down {{ cmd }}
-{%         endfor %}
-{%       endif %}
-{%       if hostvars[inventory_hostname].network.bridges[i.key] is defined %}
-{%         if hostvars[inventory_hostname].network.bridges[i.key].bridge_type == "linux" %}
-{%           if hostvars[inventory_hostname].network.bridges[i.key].slaves is defined %}
+{%           endfor %}
+{%         endif %}
+{%         if hostvars[inventory_hostname].network.bridges[i.key] is defined %}
+{%           if hostvars[inventory_hostname].network.bridges[i.key].bridge_type == "linux" %}
+{%             if hostvars[inventory_hostname].network.bridges[i.key].slaves is defined %}
   bridge_ports{% for port in hostvars[inventory_hostname].network.bridges[i.key].slaves %} {{ port }}{%           endfor%}
 
-{%           else %}
+{%             else %}
   bridge_ports none
-{%           endif %}
+{%             endif %}
   bridge_stp {{ hostvars[inventory_hostname].network.bridges[i.key].stp | default("off") }}
   bridge_fd      {{ hostvars[inventory_hostname].network.bridges[i.key].fd | default (0) }}
   bridge_maxwait {{ hostvars[inventory_hostname].network.bridges[i.key].maxwait | default (0) }}
-{%           if hostvars[inventory_hostname].network.bridges[i.key].vlan_aware | default ('yes') == 'yes' %}
+{%             if hostvars[inventory_hostname].network.bridges[i.key].vlan_aware | default ('yes') == 'yes' %}
   bridge_vlan_aware yes
+{%             endif %}
 {%           endif %}
 {%         endif %}
-{%       endif %}
-{%       if hostvars[inventory_hostname].network.vlans[i.key] is defined %}
+{%         if hostvars[inventory_hostname].network.vlans[i.key] is defined %}
   vlan-raw-device {{ hostvars[inventory_hostname].network.vlans[i.key].rawdevice }}
   pre-up ip link add link {{ hostvars[inventory_hostname]['network']['vlans'][i.key].rawdevice }} name {{ i.key }} type vlan id {{ hostvars[inventory_hostname]['network']['vlans'][i.key].vlanid }} || true
-{%       endif %}
-{%       for extra in i.value.extra | default([]) %}
+{%         endif %}
+{%         for extra in i.value.extra | default([]) %}
   {{ extra }}
-{%       endfor %}
-{%     endif %}
-{%     if i.value.config6_type is defined %}
+{%         endfor %}
+{%       endif %}
+{%       if i.value.config6_type is defined %}
 iface {{ i.key }} inet6 {{ i.value.config6_type }}
-{%       if i.value.address6 is defined %}
+{%         if i.value.address6 is defined %}
   address {{ i.value.address6 }}
-{%       endif %}
-{%       if i.value.gateway6 is defined %}
+{%         endif %}
+{%         if i.value.gateway6 is defined %}
   gateway {{ i.value.gateway6 }}
-{%       endif %}
-{%       if i.value.metric is defined %}
+{%         endif %}
+{%         if i.value.metric is defined %}
   metric {{ i.value.metric }}
-{%       endif %}
-{%       if i.value.preup6 is defined %}
-{%         for cmd in i.value.preup6 | default([]) %}
+{%         endif %}
+{%         if i.value.preup6 is defined %}
+{%           for cmd in i.value.preup6 | default([]) %}
   pre-up {{ cmd }}
-{%         endfor %}
-{%       endif %}
-{%       if i.value.up6 is defined %}
-{%         for cmd in i.value.up6 | default([]) %}
+{%           endfor %}
+{%         endif %}
+{%         if i.value.up6 is defined %}
+{%           for cmd in i.value.up6 | default([]) %}
   up {{ cmd }}
-{%         endfor %}
-{%       endif %}
-{%       if i.value.down6 is defined %}
-{%         for cmd in i.value.down6 | default([]) %}
+{%           endfor %}
+{%         endif %}
+{%         if i.value.down6 is defined %}
+{%           for cmd in i.value.down6 | default([]) %}
   down {{ cmd }}
-{%         endfor %}
-{%       endif %}
-{%       if i.value.postdown6 is defined %}
-{%         for cmd in i.value.postdown6 | default([]) %}
+{%           endfor %}
+{%         endif %}
+{%         if i.value.postdown6 is defined %}
+{%           for cmd in i.value.postdown6 | default([]) %}
   post-down {{ cmd }}
-{%         endfor %}
+{%           endfor %}
+{%         endif %}
 {%       endif %}
-{%     endif %}
-{%   endfor %}
+{%     endfor %}
+{%   endif %}
 {% endif %}
 
 source /etc/network/interfaces-standortvernetzung
