@@ -1,5 +1,5 @@
 - name: create/modify user
-  user:
+  ansible.builtin.user:
     name: "{{ user }}"
     uid: "{{ lihas_common_users[user].uid }}"
     group: "{{ lihas_common_users[user].group | default(omit) }}"
@@ -11,9 +11,9 @@
     state: "{{ lihas_common_users[user].state | default('present') }}"
   tags:
     - users
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: "home directory permissions in case we had previous content there"
-  file:
+  ansible.builtin.file:
     path: "{{ lihas_common_users[user].home | default('/home/' + user) }}"
     state: directory
     owner: "{{ user }}"
@@ -21,4 +21,4 @@
   when: lihas_common_users[user].force_home_user | default(false)
   tags:
     - users
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"

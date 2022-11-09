@@ -1,20 +1,20 @@
 ---
 - name: reset host entry
-  set_fact:
+  ansible.builtin.set_fact:
     hostentry: ""
 - name: reset host entry
-  set_fact:
-    HOSTENTRY: ""
+  ansible.builtin.set_fact:
+    hostentry_combined: ""
 - name: combine host entry
   include_tasks: 10-etc_hosts_entry_name.yml
   loop: "{{ hostvars[inventory_hostname][configgroup]['config']['hosts'][ip] }}"
   loop_control:
     loop_var: name
 - name: "/etc/hosts {{ ip }}"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/hosts"
     state: present
     regexp: "{{ ip }}[ \t]+{{ hostentry }}"
     line: "{{ ip }}\t{{ hostentry }}"
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 ...

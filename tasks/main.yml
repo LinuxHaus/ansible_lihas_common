@@ -1,101 +1,101 @@
 ---
 - name: mark role lihas_common done
-  set_fact:
+  ansible.builtin.set_fact:
     role_done_lihas_common: true
   tags:
     - always
     - variables
 - name: mark lihas_common done
-  set_fact:
+  ansible.builtin.set_fact:
     lihas_common_done: true
     cacheable: false
   tags:
     - always
     - variables
 - name: lihas_become init
-  set_fact:
+  ansible.builtin.set_fact:
     lihas_become: "no"
 - name: check if become is necessary
-  set_fact:
+  ansible.builtin.set_fact:
     lihas_become: "yes"
   when: ansible_effective_user_id != 0
 - name: "DEBUG: lihas_become"
-  debug:
+  ansible.builtin.debug:
     var: lihas_become
     verbosity: 1
 - name: "DEBUG: ansible_effective_user_id"
-  debug:
+  ansible.builtin.debug:
     var: ansible_effective_user_id
     verbosity: 1
 - name: include variables
-  import_role:
+  ansible.builtin.import_role:
     name: lihas_variables
   when: configspaces is not defined
   tags:
     - always
     - variables
 - name: reset_apt_update
-  set_fact:
-    apt_update: False
+  ansible.builtin.set_fact:
+    apt_update: false
 - name: "Set default locale to {{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "/etc/default/locale"
     regexp: "LANG="
     line: "LANG={{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
   notify: reconfigure locales
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: "Set to generate locales {{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
-  lineinfile:
+  ansible.builtin.lineinfile:
     mode: 0644
     path: /etc/locale.gen
     line: '{{ item }} \2'
     regexp: "^(# |){{ item }} (.*)"
-    backrefs: True
+    backrefs: true
     state: present
   loop: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
   notify: reconfigure locales
-  when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become}}"
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+  become: "{{ lihas_become }}"
 - name: "Set tzdata area to {{ tzdata_areas | default('Europe') }}"
-  debconf:
+  ansible.builtin.debconf:
     name: tzdata
     question: "tzdata/Areas"
     vtype: select
     value: "{{ tzdata_areas | default('Europe') }}"
   notify: reconfigure tzdata
-  when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become}}"
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+  become: "{{ lihas_become }}"
 - name: "Set tzdata zone to {{ tzdata_zones_europe | default('Berlin') }}"
-  debconf:
+  ansible.builtin.debconf:
     name: tzdata
     question: "tzdata/Zones/Europe"
     vtype: select
     value: "{{ tzdata_zones_europe | default('Berlin') }}"
   notify: reconfigure tzdata
-  when: ansible_distribution == "Debian"or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become}}"
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+  become: "{{ lihas_become }}"
 
 - name: collect network entries from LIHASVARS
-  set_fact:
-    network: "{{ network | default({}) | combine( LIHASVARS.network | default({}), recursive=True, list_merge='append_rp' ) }}"
+  ansible.builtin.set_fact:
+    network: "{{ network | default({}) | combine( LIHASVARS.network | default({}), recursive=true, list_merge='append_rp' ) }}"
   when: LIHASVARS.network is defined
   tags:
     - network
 - name: collect network entries from configspaces
-  set_fact:
-    network: "{{ network | default({}) | combine( hostvars[inventory_hostname][item]['config']['network'], recursive=True, list_merge='append_rp' ) }}"
-    cacheable: no
+  ansible.builtin.set_fact:
+    network: "{{ network | default({}) | combine( hostvars[inventory_hostname][item]['config']['network'], recursive=true, list_merge='append_rp' ) }}"
+    cacheable: false
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['network'] is defined
   tags:
     - network
 - name: DEBUG network after %.config.network
-  debug:
+  ansible.builtin.debug:
     var: hostvars
     verbosity: 2
 - name: deploy /etc/network/interfaces
-  template:
+  ansible.builtin.template:
     src: etc/network/interfaces.j2
     dest: /etc/network/interfaces
     mode: 0644
@@ -103,16 +103,16 @@
   register: result
   tags:
     - network
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: protect /etc/network/interfaces on Proxmox/LXC
-  copy:
+  ansible.builtin.copy:
     dest: /etc/network/.pve-ignore.interfaces
     src: /dev/null
     mode: 0644
   when: ansible_virtualization_type == 'lxc' and network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   tags:
     - network
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 # /etc/hosts
 - name: add lines to /etc/hosts
   include_tasks: tasks/10-etc_hosts.yml
@@ -121,225 +121,227 @@
     loop_var: configgroup
   when: configspaces is defined
 - name: remove 127.0.1.1 from /etc/hosts
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/hosts
     state: absent
     regexp: '^127\.0\.1\.1'
 # repositories
 - name: remove obsolete /etc/apt/sources.list.d/lihas.list
-  file:
+  ansible.builtin.file:
     state: absent
     path: /etc/apt/sources.list.d/lihas.list
   register: result
   when: ansible_distribution_release == "buster"
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: set_apt_update
-  set_fact:
-    apt_update: True
+  ansible.builtin.set_fact:
+    apt_update: true
   when: result.changed
 - name: enable buster-backports
-  template:
+  ansible.builtin.template:
     src: etc/apt/sources.list.d/buster-backports.list
     dest: /etc/apt/sources.list.d/buster-backports.list
     mode: 0644
   register: result
   when: ansible_distribution_release == "buster"
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: set_apt_update
-  set_fact:
-    apt_update: True
+  ansible.builtin.set_fact:
+    apt_update: true
   when: result.changed
 - name: backports get lower preference
-  copy:
+  ansible.builtin.copy:
     src: etc/apt/preferences.d/buster_backports.pref
     dest: /etc/apt/preferences.d/buster_backports.pref
     mode: 0644
   register: result
   when: ansible_distribution_release == "buster"
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: set_apt_update
-  set_fact:
-    apt_update: True
+  ansible.builtin.set_fact:
+    apt_update: true
   when: result.changed
 - name: create /etc/apt/preferences.d
-  file:
+  ansible.builtin.file:
     state: directory
     path: /etc/apt/preferences.d
     mode: 0755
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: Update apt cache
   block:
-    - apt:
-        update_cache: True
+    - name: run apt update
+      ansible.builtin.apt:
+        update_cache: true
   rescue:
-    - shell:
+    - name: rescue apt update
+      ansible.builtin.shell:
         cmd: "rm -rf /var/lib/apt/lists/; LC_ALL=C apt-get update"
         warn: false
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: if wireguard is used, use from backports
-  copy:
+  ansible.builtin.copy:
     src: etc/apt/preferences.d/wireguard.pref
     dest: /etc/apt/preferences.d/wireguard.pref
     mode: 0644
   register: result
   when: ansible_distribution_release == "buster"
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: set_apt_update
-  set_fact:
-    apt_update: True
+  ansible.builtin.set_fact:
+    apt_update: true
   when: result.changed
 - name: apt update
-  apt:
-    update_cache: True
-  when: apt_update | default(False)
-  become: "{{lihas_become}}"
+  ansible.builtin.apt:
+    update_cache: true
+  when: apt_update | default(false)
+  become: "{{ lihas_become }}"
 - name: reset_apt_update
-  set_fact:
-    apt_update: False
+  ansible.builtin.set_fact:
+    apt_update: false
 - name: install software general
-  apt:
+  ansible.builtin.apt:
     state: present
     name:
-    - aptitude
-    - etckeeper
-    - fail2ban
-    - locales
-    - needrestart
-    - rsync
-    - screen
-    - tzdata
-    - vim
+      - aptitude
+      - etckeeper
+      - fail2ban
+      - locales
+      - needrestart
+      - rsync
+      - screen
+      - tzdata
+      - vim
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   async: 120
   poll: 1
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
   tags:
     - software
 - name: etc/needrestart/conf.d/90-needrestart-lxc.conf
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/{{ item }}"
     mode: 0644
   loop:
     - etc/needrestart/conf.d/90-needrestart-lxc.conf
   when: ansible_virtualization_type == 'lxc'
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: install software buster/bullseye only
-  apt:
+  ansible.builtin.apt:
     name:
-    - extrepo
+      - extrepo
     state: present
   when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"
   tags:
     - extrepo
     - software
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: extrepo enable lihas
-  command:
+  ansible.builtin.command:
     cmd: /usr/bin/extrepo enable lihas
-  changed_when: False
+  changed_when: false
   when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"
   tags:
     - extrepo
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: extrepo Repositories to enable
-  set_fact:
+  ansible.builtin.set_fact:
     lihas_extrepo: "{{ lihas_extrepo | default([]) + hostvars[inventory_hostname][item]['config']['extrepo'] }}"
-    cacheable: no
+    cacheable: false
   with_list: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['extrepo'] is defined
   tags:
     - extrepo
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: debug lihas_extrepo
-  debug:
+  ansible.builtin.debug:
     var: lihas_extrepo
     verbosity: 1
   tags:
     - extrepo
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: extrepo enable extra Repositories
-  command:
+  ansible.builtin.command:
     cmd: /usr/bin/extrepo enable {{ item }}
-  changed_when: False
+  changed_when: false
   register: resultloop
   with_list: "{{ lihas_extrepo }}"
   when: lihas_extrepo is defined
   tags:
     - extrepo
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: debug resultloop
-  debug:
+  ansible.builtin.debug:
     var: resultloop
     verbosity: 1
   tags:
     - extrepo
 - name: set_apt_update
-  set_fact:
-    apt_update: True
+  ansible.builtin.set_fact:
+    apt_update: true
 #  when: '( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" ) and "repository already existed" not in result.stdout'
   tags:
     - extrepo
 - name: apt update
-  apt:
-    update_cache: True
-  when: apt_update | default (False)
-  become: "{{lihas_become}}"
+  ansible.builtin.apt:
+    update_cache: true
+  when: apt_update | default (false)
+  become: "{{ lihas_become }}"
 - name: reset_apt_update
-  set_fact:
-    apt_update: False
+  ansible.builtin.set_fact:
+    apt_update: false
 - name: Update apt cache
-  apt:
-    update_cache: True
+  ansible.builtin.apt:
+    update_cache: true
     cache_valid_time: 600
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: disable systemd-modules-load.service on lxc
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-modules-load.service
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: disable systemd-journald-audit.socket on lxc
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-journald-audit.socket
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: disable sys-kernel-config.mount on lxc
-  systemd:
+  ansible.builtin.systemd:
     name: sys-kernel-config.mount
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: disable sys-kernel-debug.mount on lxc
-  systemd:
+  ansible.builtin.systemd:
     name: sys-kernel-debug.mount
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: disable systemd-remount-fs.service on lxc
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-remount-fs.service
     masked: true
   when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: mark role lihas_common done
-  set_fact:
+  ansible.builtin.set_fact:
     role_done_lihas_common: true
   when: role_done_lihas_common is not defined
 
 - name: "lihas-routes: collect"
-  set_fact:
-    lihas_routes: "{{ lihas_routes | default({}) | combine( hostvars[inventory_hostname][item]['config']['routes'], recursive=True, list_merge='append_rp') }}"
-    cacheable: no
+  ansible.builtin.set_fact:
+    lihas_routes: "{{ lihas_routes | default({}) | combine( hostvars[inventory_hostname][item]['config']['routes'], recursive=true, list_merge='append_rp') }}"
+    cacheable: false
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['routes'] is defined
   tags:
     - routes
 - name: "lihas-routes: template"
-  template:
+  ansible.builtin.template:
     src: "etc/systemd/system/routing-lihas.service"
     dest: "/etc/systemd/system/routing-lihas.service"
     mode: 0644
@@ -348,59 +350,60 @@
   register: systemd
   tags:
     - routes
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: "lihas-routes: reload_systemd"
-  systemd:
-    daemon_reload: yes
+  ansible.builtin.systemd:
+    daemon_reload: true
   when: lihas_routes is defined and systemd.changed
   tags:
     - routes
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: "lihas-routes: service"
-  service:
+  ansible.builtin.service:
     name: routing-lihas
-    enabled: yes
+    enabled: true
   when: lihas_routes is defined
   tags:
     - routes
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 
 
 - name: find additional software packages
-  set_fact:
+  ansible.builtin.set_fact:
     lihas_common_extra_packages: "{{ lihas_common_extra_packages | default([]) + hostvars[inventory_hostname][item]['config']['software']['debian'] | default([]) }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['software']['debian'] is defined
 - name: install additional software for this host/group
-  apt:
+  ansible.builtin.apt:
     name: "{{ lihas_common_extra_packages }}"
     state: present
   when: ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" ) and lihas_common_extra_packages is defined
   async: 120
   poll: 1
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
   tags:
     - software
 - name: find addtional files/templates
-  set_fact:
+  ansible.builtin.set_fact:
     lihas_common_extra_files: "{{ lihas_common_extra_files | default([]) + hostvars[inventory_hostname][item]['config']['files'] | default([]) }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['files'] is defined
   tags:
     - templates
 - name: "copy additional files/templates: create directories"
-  file:
+  ansible.builtin.file:
     path: "/{{ item | dirname() }}"
     state: directory
+    mode: 0755
   loop: "{{ lihas_common_extra_files | default([]) }}"
   loop_control:
     loop_var: item
   when: lihas_common_extra_files is defined
   tags:
     - templates
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 - name: copy additional files/templates
-  template:
+  ansible.builtin.template:
     src: "{{ item }}"
     dest: "/{{ item }}"
     mode: 0644
@@ -410,10 +413,10 @@
   when: lihas_common_extra_files is defined
   tags:
     - templates
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
 
 - name: find addtional files/templates with permissions
-  set_fact:
+  ansible.builtin.set_fact:
     lihas_common_extra_files_with_perms: "{{ lihas_common_extra_files_with_perms | default([]) + hostvars[inventory_hostname][item]['config']['fileswithpermissions'] | default([]) }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['fileswithpermissions'] is defined
@@ -430,8 +433,8 @@
 
 # create groups
 - name: "groups: find groups"
-  set_fact:
-    lihas_common_groups: "{{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] | default({}), recursive=True, list_merge='append_rp') }}"
+  ansible.builtin.set_fact:
+    lihas_common_groups: "{{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] | default({}), recursive=true, list_merge='append_rp') }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['groups'] is defined
   tags:
@@ -446,8 +449,8 @@
 
 # create users
 - name: "users: find users"
-  set_fact:
-    lihas_common_users: "{{ lihas_common_users | default({}) | combine(hostvars[inventory_hostname][item]['config']['users'] | default({}), recursive=True, list_merge='append_rp') }}"
+  ansible.builtin.set_fact:
+    lihas_common_users: "{{ lihas_common_users | default({}) | combine(hostvars[inventory_hostname][item]['config']['users'] | default({}), recursive=true, list_merge='append_rp') }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['users'] is defined
   tags:
@@ -460,7 +463,7 @@
   tags:
     - users
 
-- name: include lihas_sysctl
-  import_role:
+- name: include_role lihas_sysctl
+  ansible.builtin.import_role:
     name: lihas_sysctl
   when: lihas_sysctl_done is not defined

@@ -1,8 +1,8 @@
 - name: create/modify group
-  group:
+  ansible.builtin.group:
     name: "{{ group }}"
     gid: "{{ lihas_common_groups[group].gid }}"
     state: "{{ lihas_common_groups[group].state | default('present') }}"
   tags:
     - groups
-  become: "{{lihas_become}}"
+  become: "{{ lihas_become }}"
