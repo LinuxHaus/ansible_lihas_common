@@ -51,6 +51,44 @@ selectivly run only parts:
     * []: list of names
 * X.config.network
     * if present, overwrite /etc/network/interfaces, supports bridges, vlans and interfaces as such
+* X.config.network.interfaces_rename.{}:
+    * rename interface in key to value
+* X.config.network.interfaces.{}.auto
+* X.config.network.interfaces.{}.config_type
+* X.config.network.interfaces.{}.config6_type
+* X.config.network.interfaces.{}.address
+* X.config.network.interfaces.{}.address6
+* X.config.network.interfaces.{}.pointopoint
+* X.config.network.interfaces.{}.gateway
+* X.config.network.interfaces.{}.gateway6
+* X.config.network.interfaces.{}.hwaddress
+* X.config.network.interfaces.{}.mtu
+* X.config.network.interfaces.{}.metric
+* X.config.network.interfaces.{}.dns-nameserver
+* X.config.network.interfaces.{}.preup6
+* X.config.network.interfaces.{}.up6
+* X.config.network.interfaces.{}.down6
+* X.config.network.interfaces.{}.postdown6
+* X.config.network.interfaces.{}.preup
+* X.config.network.interfaces.{}.up
+* X.config.network.interfaces.{}.down
+* X.config.network.interfaces.{}.postdown
+* X.config.network.interfaces.{}.extra: []
+* X.config.network.interfaces.{}.comment:
+* X.config.network.bridges.{}
+* X.config.network.bridges.{}.bridge_type
+* X.config.network.bridges.{}.slaves: []
+* X.config.network.bridges.{}.stp
+* X.config.network.bridges.{}.fd
+* X.config.network.bridges.{}.maxwait
+* X.config.network.bridges.{}.vlan_aware
+* X.config.network.vlans.{}
+* X.config.network.vlans.{}.rawdevice
+* X.config.network.vlans.{}
+* X.config.network.bond.{}.slaves: []
+* X.config.network.bond.{}.miimon:
+* X.config.network.bond.{}.mode:
+* X.config.network.bond.{}.primary:
 * X.config.routes.'network/cidr'.gateway
 * X.config.routes.'network/cidr'.metric
 * X.config.extrepo: []
@@ -98,6 +136,7 @@ XY:
             - eth1
       interfaces:
         auto: allow-auto
+        comment: Comment
         vmbr9999:
           config_type: static # static, manual, dhcp
           address: 10.10.255.2/24
@@ -116,6 +155,15 @@ XY:
         vlan101:
           rawdevice: eth2
           vlanid: '101'
+      bond:
+        bond0:
+          slaves:
+            - eth0
+            - eth1
+          miimon: 100
+          mode: active-backup
+          primary: eth0
+
     routes:
       10.0.0.0/8:
         gateway: 192.168.4.1

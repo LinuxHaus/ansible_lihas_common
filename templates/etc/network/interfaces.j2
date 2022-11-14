@@ -25,6 +25,9 @@ iface {{ i.key }} inet {{ i.value.config_type }}
 {%         if i.value.gateway is defined %}
   gateway {{ i.value.gateway }}
 {%         endif %}
+{%         if i.value.hwaddress is defined %}
+  hwaddress {{ i.value.hwaddress }}
+{%         endif %}
 {%         if i.value.mtu is defined %}
   mtu {{ i.value.mtu }}
 {%         endif %}
@@ -74,6 +77,21 @@ iface {{ i.key }} inet {{ i.value.config_type }}
   vlan-raw-device {{ hostvars[inventory_hostname].network.vlans[i.key].rawdevice }}
   pre-up ip link add link {{ hostvars[inventory_hostname]['network']['vlans'][i.key].rawdevice }} name {{ i.key }} type vlan id {{ hostvars[inventory_hostname]['network']['vlans'][i.key].vlanid }} || true
 {%         endif %}
+{%         if hostvars[inventory_hostname].network.bond[i.key] is defined %}
+{%           if hostvars[inventory_hostname].network.bond[i.key].slaves is defined %}
+  bond-slaves {% for port in hostvars[inventory_hostname].network.bond[i.key].slaves | default(['none']) %} {{ port }}{%           endfor %}
+
+{%           endif %}
+{%           if hostvars[inventory_hostname].network.bond[i.key].miimon is defined %}
+  bond-miimon {{ hostvars[inventory_hostname].network.bond[i.key].miimon }}
+{%           endif %}
+{%           if hostvars[inventory_hostname].network.bond[i.key].mode is defined %}
+  bond-mode {{ hostvars[inventory_hostname].network.bond[i.key].mode }}
+{%           endif %}
+{%           if hostvars[inventory_hostname].network.bond[i.key].primary is defined %}
+  bond-primary {{ hostvars[inventory_hostname].network.bond[i.key].primary }}
+{%           endif %}
+{%         endif %}
 {%         for extra in i.value.extra | default([]) %}
   {{ extra }}
 {%         endfor %}
@@ -110,8 +128,12 @@ iface {{ i.key }} inet6 {{ i.value.config6_type }}
 {%           endfor %}
 {%         endif %}
 {%       endif %}
+{%       if i.value.comment is defined %}
+# {{ i.value.comment }}
+{%       endif %}
+
 {%     endfor %}
 {%   endif %}
 {% endif %}
 
-source /etc/network/interfaces-standortvernetzung
+source /etc/network/interfaces.d/*

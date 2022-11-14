@@ -202,19 +202,8 @@
 - name: install software general
   ansible.builtin.apt:
     state: present
-    name:
-      - aptitude
-      - etckeeper
-      - fail2ban
-      - locales
-      - needrestart
-      - rsync
-      - screen
-      - tzdata
-      - vim
+    name: ['aptitude', 'etckeeper', 'fail2ban', 'locales', 'needrestart', 'rsync', 'screen', 'tzdata', 'vim' ]
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  async: 120
-  poll: 1
   become: "{{ lihas_become }}"
   tags:
     - software
@@ -378,8 +367,6 @@
     name: "{{ lihas_common_extra_packages }}"
     state: present
   when: ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" ) and lihas_common_extra_packages is defined
-  async: 120
-  poll: 1
   become: "{{ lihas_become }}"
   tags:
     - software
