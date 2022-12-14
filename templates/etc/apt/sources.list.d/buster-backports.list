@@ -1,1 +1,1 @@
-deb https://deb.debian.org/debian/ buster-backports main contrib non-free
+deb {{ LIHASVARS.variables.debianmirror | default("https://deb.debian.org/") }}debian/ buster-backports main contrib non-free
