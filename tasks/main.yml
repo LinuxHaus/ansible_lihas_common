@@ -427,6 +427,12 @@
   when: hostvars[inventory_hostname][item]['config']['groups'] is defined
   tags:
     - groups
+- name: "debug groups"
+  debug:
+    var: lihas_common_groups
+    verbosity: 1
+  tags:
+    - groups
 - name: "groups: include tasks/10-groups.yml"
   include_tasks: tasks/10-groups.yml
   loop: "{{ lihas_common_groups | default({}) | flatten(levels=1) }}"

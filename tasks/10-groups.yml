@@ -3,6 +3,7 @@
     name: "{{ group }}"
     gid: "{{ lihas_common_groups[group].gid }}"
     state: "{{ lihas_common_groups[group].state | default('present') }}"
+    system: "{{ lihas_common_groups[group].system | default(false) }}"
   tags:
     - groups
   become: "{{ lihas_become }}"
