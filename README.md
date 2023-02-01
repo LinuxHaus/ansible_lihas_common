@@ -101,6 +101,15 @@ selectivly run only parts:
 * X.config.fileswithpermissions.[].perms.group:
 * X.config.fileswithpermissions.[].perms.mode:
     * owner, group, mode (octal or quoted)
+* X.config.users."username".uid: 1234
+* X.config.users."username".comment: "Karl Koch"
+* X.config.users."username".group: primarygroup
+* X.config.users."username".groups: group1,group2
+* X.config.users."username".home: /home/user
+* X.config.users."username".shell: /bin/bash
+* X.config.users."username".ssh_authorized_keys: [ 'ssh-rsa abcd demo' ]
+* X.config.users."username".sudo: false
+
 ## Variables example
 ```
 locales_default_environment_locale: de_DE.UTF-8
@@ -117,11 +126,12 @@ XY:
     users:
       "username":
         uid: 1234
-	comment: "Karl Koch"
-	group: primarygroup
-	groups: group1,group2
-	home: /home/user
-	shell: /bin/bash
+        comment: "Karl Koch"
+        group: primarygroup
+        groups: group1,group2
+        home: /home/user
+        shell: /bin/bash
+        ssh_authorized_keys: [ 'ssh-rsa abcd demo' ]
     hosts:
       "192.168.0.1":
         - example.com

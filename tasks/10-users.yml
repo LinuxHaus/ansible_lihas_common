@@ -1,7 +1,7 @@
 - name: create/modify user
   ansible.builtin.user:
     name: "{{ user }}"
-    uid: "{{ lihas_common_users[user].uid }}"
+    uid: "{{ lihas_common_users[user].uid | default(omit) }}"
     group: "{{ lihas_common_users[user].group | default(omit) }}"
     shell: "{{ lihas_common_users[user].shell | default(omit) }}"
     comment: "{{ lihas_common_users[user].comment | default(omit) }}"
@@ -22,3 +22,28 @@
   tags:
     - users
   become: "{{ lihas_become }}"
+- name: "add ssh key"
+  ansible.posix.authorized_key:
+    key: "{{ sshkey }}"
+    manage_dir: true
+    user: "{{ user }}"
+    path: "{{ lihas_common_users[user].home | default('/home/' + user) + '/.ssh/authorized_keys' }}"
+  loop: "{{ lihas_common_users[user].ssh_authorized_keys | default([]) }}"
+  loop_control:
+    loop_var: sshkey
+  tags:
+    - users
+  become: "{{ lihas_become }}"
+- name: "add sudo"
+  ansible.builtin.template:
+    dest: "/etc/sudoers.d/{{ user }}"
+    mode: 0440
+    owner: root
+    group: root
+    validate: 'visudo -cf %s'
+    src: "etc/sudoers.d/sudo.j2"
+  tags:
+    - users
+  become: "{{ lihas_become }}"
+  when: lihas_common_users[user].sudo | default(false)
+...
