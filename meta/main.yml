@@ -1,6 +1,7 @@
 ---
 galaxy_info:
   author: lihas@lihas.de
+  namespace: lihas
   description: common tasks for possibly all installations
   license: GPL-3.0-or-later
   galaxy_tags: []

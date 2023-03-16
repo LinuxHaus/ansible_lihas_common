@@ -97,9 +97,9 @@ selectivly run only parts:
     * files to copy
 * X.config.fileswithpermissions.[].directories: []
     * directories to create
-* X.config.fileswithpermissions.[].perms.owner:
-* X.config.fileswithpermissions.[].perms.group:
-* X.config.fileswithpermissions.[].perms.mode:
+* X.config.fileswithpermissions.[].perm.owner:
+* X.config.fileswithpermissions.[].perm.group:
+* X.config.fileswithpermissions.[].perm.mode:
     * owner, group, mode (octal or quoted)
 * X.config.users."username".uid: 1234
 * X.config.users."username".comment: "Karl Koch"

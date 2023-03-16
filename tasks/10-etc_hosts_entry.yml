@@ -15,6 +15,6 @@
     path: "/etc/hosts"
     state: present
     regexp: "{{ ip }}[ \t]+{{ hostentry }}"
-    line: "{{ ip }}\t{{ hostentry }}"
+    line: "{{ ip }}  {{ hostentry }}"
   become: "{{ lihas_become }}"
 ...
