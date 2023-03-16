@@ -42,19 +42,19 @@
     dest: "/etc/default/locale"
     regexp: "LANG="
     line: "LANG={{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
-  notify: reconfigure locales
+  notify: Reconfigure locales
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   become: "{{ lihas_become }}"
 - name: "Set to generate locales {{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
   ansible.builtin.lineinfile:
-    mode: 0644
+    mode: "0644"
     path: /etc/locale.gen
     line: '{{ item }} \2'
     regexp: "^(# |){{ item }} (.*)"
     backrefs: true
     state: present
   loop: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
-  notify: reconfigure locales
+  notify: Reconfigure locales
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   become: "{{ lihas_become }}"
 - name: "Set tzdata area to {{ tzdata_areas | default('Europe') }}"
@@ -63,7 +63,7 @@
     question: "tzdata/Areas"
     vtype: select
     value: "{{ tzdata_areas | default('Europe') }}"
-  notify: reconfigure tzdata
+  notify: Reconfigure tzdata
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   become: "{{ lihas_become }}"
 - name: "Set tzdata zone to {{ tzdata_zones_europe | default('Berlin') }}"
@@ -72,7 +72,7 @@
     question: "tzdata/Zones/Europe"
     vtype: select
     value: "{{ tzdata_zones_europe | default('Berlin') }}"
-  notify: reconfigure tzdata
+  notify: Reconfigure tzdata
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   become: "{{ lihas_become }}"
 
@@ -98,7 +98,7 @@
   ansible.builtin.template:
     src: etc/network/interfaces.j2
     dest: /etc/network/interfaces
-    mode: 0644
+    mode: "0644"
   when: network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   register: result
   tags:
@@ -108,7 +108,7 @@
   ansible.builtin.copy:
     dest: /etc/network/.pve-ignore.interfaces
     src: /dev/null
-    mode: 0644
+    mode: "0644"
   when: ansible_virtualization_type == 'lxc' and network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   tags:
     - network
@@ -142,7 +142,7 @@
   ansible.builtin.template:
     src: etc/apt/sources.list.d/buster-backports.list
     dest: /etc/apt/sources.list.d/buster-backports.list
-    mode: 0644
+    mode: "0644"
   register: result
   when: ansible_distribution_release == "buster"
   become: "{{ lihas_become }}"
@@ -154,7 +154,7 @@
   ansible.builtin.copy:
     src: etc/apt/preferences.d/buster_backports.pref
     dest: /etc/apt/preferences.d/buster_backports.pref
-    mode: 0644
+    mode: "0644"
   register: result
   when: ansible_distribution_release == "buster"
   become: "{{ lihas_become }}"
@@ -166,7 +166,7 @@
   ansible.builtin.file:
     state: directory
     path: /etc/apt/preferences.d
-    mode: 0755
+    mode: "0755"
   become: "{{ lihas_become }}"
 - name: Fix potential previeous errors by creating /var/lib/apt/lists
   ansible.builtin.file:
@@ -197,7 +197,7 @@
   ansible.builtin.copy:
     src: etc/apt/preferences.d/wireguard.pref
     dest: /etc/apt/preferences.d/wireguard.pref
-    mode: 0644
+    mode: "0644"
   register: result
   when: ansible_distribution_release == "buster"
   become: "{{ lihas_become }}"
@@ -225,7 +225,7 @@
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/{{ item }}"
-    mode: 0644
+    mode: "0644"
   loop:
     - etc/needrestart/conf.d/90-needrestart-lxc.conf
   when: ansible_virtualization_type == 'lxc'
@@ -240,11 +240,16 @@
     - extrepo
     - software
   become: "{{ lihas_become }}"
+- name: Extrepo enable lihas check presence
+  ansible.builtin.stat:
+    path: "{{ '/etc/apt/sources.list.d/extrepo_lihas.sources' }}"
+  register: statresult
+  become: "{{ lihas_become | default(no) }}"
 - name: Extrepo enable lihas
   ansible.builtin.command:
     cmd: /usr/bin/extrepo enable lihas
-  changed_when: false
-  when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"
+  when: ( not statresult.stat.exists ) and ( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" )
+  changed_when: true
   tags:
     - extrepo
   become: "{{ lihas_become }}"
@@ -347,9 +352,9 @@
   ansible.builtin.template:
     src: "etc/systemd/system/routing-lihas.service"
     dest: "/etc/systemd/system/routing-lihas.service"
-    mode: 0644
+    mode: "0644"
   when: lihas_routes is defined
-  notify: restart_routing-lihas
+  notify: Restart routing-lihas
   register: systemd
   tags:
     - routes
@@ -373,7 +378,9 @@
 
 - name: Find additional software packages
   ansible.builtin.set_fact:
-    lihas_common_extra_packages: "{{ lihas_common_extra_packages | default([]) + hostvars[inventory_hostname][item]['config']['software']['debian'] | default([]) }}"
+    lihas_common_extra_packages: >-
+      "{{ lihas_common_extra_packages | default([]) +
+      hostvars[inventory_hostname][item]['config']['software']['debian'] | default([]) }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['software']['debian'] is defined
 - name: Install additional software for this host/group
@@ -395,7 +402,7 @@
   ansible.builtin.file:
     path: "/{{ item | dirname() }}"
     state: directory
-    mode: 0755
+    mode: "0755"
   loop: "{{ lihas_common_extra_files | default([]) }}"
   loop_control:
     loop_var: item
@@ -407,7 +414,7 @@
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "/{{ item }}"
-    mode: 0644
+    mode: "0644"
   loop: "{{ lihas_common_extra_files | default([]) }}"
   loop_control:
     loop_var: item
@@ -418,7 +425,9 @@
 
 - name: Find addtional files/templates with permissions
   ansible.builtin.set_fact:
-    lihas_common_extra_files_with_perms: "{{ lihas_common_extra_files_with_perms | default([]) + hostvars[inventory_hostname][item]['config']['fileswithpermissions'] | default([]) }}"
+    lihas_common_extra_files_with_perms: >-
+      "{{ lihas_common_extra_files_with_perms | default([]) +
+      hostvars[inventory_hostname][item]['config']['fileswithpermissions'] | default([]) }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['fileswithpermissions'] is defined
   tags:
@@ -435,7 +444,9 @@
 # create groups
 - name: "Groups: find groups"
   ansible.builtin.set_fact:
-    lihas_common_groups: "{{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] | default({}), recursive=true, list_merge='append_rp') }}"
+    lihas_common_groups: >-
+      "{{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] |
+      default({}), recursive=true, list_merge='append_rp') }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['groups'] is defined
   tags:
@@ -457,7 +468,9 @@
 # create users
 - name: "Users: find users"
   ansible.builtin.set_fact:
-    lihas_common_users: "{{ lihas_common_users | default({}) | combine(hostvars[inventory_hostname][item]['config']['users'] | default({}), recursive=true, list_merge='append_rp') }}"
+    lihas_common_users: >-
+      "{{ lihas_common_users | default({}) | combine(hostvars[inventory_hostname][item]['config']['users']
+      | default({}), recursive=true, list_merge='append_rp') }}"
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['users'] is defined
   tags:
