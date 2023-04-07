@@ -1,10 +1,10 @@
 ---
-- name: "debug: file"
+- name: "DEBUG: file"
   ansible.builtin.debug:
     var: file
   tags:
     - templatesperms
-- name: copy additional files/templates with permissions
+- name: Copy additional files/templates with permissions
   ansible.builtin.template:
     src: "{{ file }}"
     dest: "/{{ file }}"
@@ -15,16 +15,16 @@
   tags:
     - templatesperms
   become: "{{ lihas_become }}"
-- name: Debug resulttemplateperms
+- name: "DEBUG: resulttemplateperms"
   ansible.builtin.debug:
     var: resulttemplateperms
   tags:
     - templatesperms
   when: resulttemplateperms.changed
-- name: templatesperms, notifies
+- name: Run templatesperms, notifies
   ansible.builtin.shell:
     cmd: "{{ lihas_common_extra_files_with_perms[filegroupid]['command'] }}"
-  with_list: resulttemplateperms.results
+  with_list: '{{ resulttemplateperms.results }}'
   when: resulttemplateperms.changed and lihas_common_extra_files_with_perms[filegroupid]['command'] is defined
   tags:
     - templatesperms

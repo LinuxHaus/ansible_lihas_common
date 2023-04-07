@@ -1,8 +1,8 @@
 ---
-- name: combine host entry
+- name: Combine host entry
   ansible.builtin.set_fact:
     hostentry_combined: "{{ hostentry }} {{ name }}"
-- name: combine host entry
+- name: Combine host entry
   ansible.builtin.set_fact:
     hostentry: "{{ hostentry_combined }}"
 ...

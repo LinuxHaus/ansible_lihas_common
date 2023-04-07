@@ -1,5 +1,6 @@
 ---
-- hosts: '*'
+- name: Run lihas_common
+  hosts: '*'
   roles:
     - lihas_common
 ...

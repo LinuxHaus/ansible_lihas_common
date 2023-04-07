@@ -1,16 +1,16 @@
 ---
-- name: reset host entry
+- name: Reset host entry
   ansible.builtin.set_fact:
     hostentry: ""
-- name: reset host entry
+- name: Reset host entry
   ansible.builtin.set_fact:
     hostentry_combined: ""
-- name: combine host entry
-  include_tasks: 10-etc_hosts_entry_name.yml
+- name: Combine host entry
+  ansible.builtin.include_tasks: 10-etc_hosts_entry_name.yml
   loop: "{{ hostvars[inventory_hostname][configgroup]['config']['hosts'][ip] }}"
   loop_control:
     loop_var: name
-- name: "/etc/hosts {{ ip }}"
+- name: "Add to /etc/hosts {{ ip }}"
   ansible.builtin.lineinfile:
     path: "/etc/hosts"
     state: present

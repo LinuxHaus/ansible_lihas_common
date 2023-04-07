@@ -14,19 +14,27 @@
     - variables
 - name: Lihas_become init
   ansible.builtin.set_fact:
-    lihas_become: "no"
+    lihas_become: false
+  tags:
+    - always
 - name: Check if become is necessary
   ansible.builtin.set_fact:
-    lihas_become: "yes"
+    lihas_become: true
   when: ansible_effective_user_id != 0
+  tags:
+    - always
 - name: "DEBUG: lihas_become"
   ansible.builtin.debug:
     var: lihas_become
     verbosity: 1
+  tags:
+    - always
 - name: "DEBUG: ansible_effective_user_id"
   ansible.builtin.debug:
     var: ansible_effective_user_id
     verbosity: 1
+  tags:
+    - always
 - name: Include variables
   ansible.builtin.import_role:
     name: lihas_variables
@@ -379,10 +387,13 @@
 - name: Find additional software packages
   ansible.builtin.set_fact:
     lihas_common_extra_packages: >-
-      "{{ lihas_common_extra_packages | default([]) +
-      hostvars[inventory_hostname][item]['config']['software']['debian'] | default([]) }}"
+      {{ lihas_common_extra_packages | default([]) +
+      hostvars[inventory_hostname][item]['config']['software']['debian'] | default([]) }}
   loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['software']['debian'] is defined
+- name: "DEBUG: additional software packages"
+  ansible.builtin.debug:
+    var: lihas_common_extra_packages
+    verbosity: 1
 - name: Install additional software for this host/group
   ansible.builtin.apt:
     name: "{{ lihas_common_extra_packages }}"

@@ -1,4 +1,4 @@
-- name: create/modify user
+- name: Create/modify user
   ansible.builtin.user:
     name: "{{ user }}"
     uid: "{{ lihas_common_users[user].uid | default(omit) }}"
@@ -12,7 +12,7 @@
   tags:
     - users
   become: "{{ lihas_become }}"
-- name: "home directory permissions in case we had previous content there"
+- name: "Home directory permissions in case we had previous content there"
   ansible.builtin.file:
     path: "{{ lihas_common_users[user].home | default('/home/' + user) }}"
     state: directory
@@ -22,7 +22,7 @@
   tags:
     - users
   become: "{{ lihas_become }}"
-- name: "add ssh key"
+- name: "Add ssh key"
   ansible.posix.authorized_key:
     key: "{{ sshkey }}"
     manage_dir: true
@@ -34,10 +34,10 @@
   tags:
     - users
   become: "{{ lihas_become }}"
-- name: "add sudo"
+- name: "Add sudo"
   ansible.builtin.template:
     dest: "/etc/sudoers.d/{{ user }}"
-    mode: 0440
+    mode: "0440"
     owner: root
     group: root
     validate: 'visudo -cf %s'

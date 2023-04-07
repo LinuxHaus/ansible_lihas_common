@@ -101,6 +101,7 @@ selectivly run only parts:
 * X.config.fileswithpermissions.[].perm.group:
 * X.config.fileswithpermissions.[].perm.mode:
     * owner, group, mode (octal or quoted)
+* X.config.fileswithpermissions.[].command
 * X.config.users."username".uid: 1234
 * X.config.users."username".comment: "Karl Koch"
 * X.config.users."username".group: primarygroup
