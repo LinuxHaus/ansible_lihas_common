@@ -176,7 +176,7 @@
     path: /etc/apt/preferences.d
     mode: "0755"
   become: "{{ lihas_become }}"
-- name: Fix potential previeous errors by creating /var/lib/apt/lists
+- name: Fix potential previous errors by creating /var/lib/apt/lists
   ansible.builtin.file:
     path: "/var/lib/apt/lists"
     state: directory
@@ -493,6 +493,23 @@
     loop_var: user
   tags:
     - users
+
+- name: "Populate service facts"
+  ansible.builtin.service_facts:
+
+# ssh socket -> service
+- name: "Disable ssh.socket with systemd"
+  ansible.builtin.systemd_service:
+    enabled: false
+    state: stopped
+    name: ssh.socket
+  when: ansible_facts.services["ssh"]["source"] == "systemd"
+- name: "Enable ssh.service with systemd"
+  ansible.builtin.systemd_service:
+    enabled: true
+    state: started
+    name: ssh.socket
+  when: ansible_facts.services["ssh"]["source"] == "systemd"
 
 - name: Include_role lihas_sysctl
   ansible.builtin.import_role:
