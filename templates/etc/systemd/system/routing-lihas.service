@@ -8,7 +8,7 @@ SuccessExitStatus=2
 
 # %.config.routes:
 {% for i in lihas_routes | default({}) | dict2items %}
-ExecStart=/sbin/ip route replace {{ i.key }} via {{ i.value.gateway }} metric {{ i.value.metric | default("10") }}
+ExecStart=/sbin/ip route replace {{ i.key }} via {{ i.value.gateway }} metric {{ i.value.metric | default("10") }} mtu {{ i.value.mtu | default("1500") }}
 {% endfor %}
 
 [Install]
