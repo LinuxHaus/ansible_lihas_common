@@ -1,0 +1,9 @@
+---
+- name: Copy additional files/templates with permissions
+  ansible.builtin.include_tasks: tasks/10-filesbinary-individual.yml
+  with_list: "{{ lihas_common_extra_filesbinary[filegroupid]['files'] | default([]) }}"
+  loop_control:
+    loop_var: file
+  tags:
+    - templatesperms
+...

@@ -1,0 +1,33 @@
+---
+- name: "DEBUG: file"
+  ansible.builtin.debug:
+    var: file
+    verbosity: 1
+  tags:
+    - templatesperms
+- name: Copy additional files/templates with permissions
+  ansible.builtin.copy:
+    src: "{{ file }}"
+    dest: "/{{ file }}"
+    mode: "{{ lihas_common_extra_filesbinary[filegroupid]['perm']['mode'] | default(664) }}"
+    owner: "{{ lihas_common_extra_filesbinary[filegroupid]['perm']['owner'] | default('root') }}"
+    group: "{{ lihas_common_extra_filesbinary[filegroupid]['perm']['group'] | default('root') }}"
+  register: resulttemplateperms
+  tags:
+    - templatesperms
+  become: "{{ lihas_become }}"
+- name: "DEBUG: resulttemplateperms"
+  ansible.builtin.debug:
+    var: resulttemplateperms
+  tags:
+    - templatesperms
+  when: resulttemplateperms.changed
+- name: Run templatesperms, notifies
+  ansible.builtin.shell:
+    cmd: "{{ lihas_common_extra_filesbinary[filegroupid]['command'] }}"
+  with_list: '{{ resulttemplateperms.results }}'
+  when: resulttemplateperms.changed and lihas_common_extra_filesbinary[filegroupid]['command'] is defined
+  tags:
+    - templatesperms
+  become: "{{ lihas_become }}"
+...

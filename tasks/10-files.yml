@@ -1,8 +1,8 @@
 ---
-- name: create directories with permissions
+- name: Create directories with permissions
   ansible.builtin.file:
     path: "/{{ item }}"
-    mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(664) }}"
+    mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(775) }}"
     owner: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['owner'] | default('root') }}"
     group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
     state: directory
@@ -12,8 +12,8 @@
   tags:
     - templatesperms
   become: "{{ lihas_become }}"
-- name: copy additional files/templates with permissions
-  include_tasks: tasks/10-files-individual.yml
+- name: Copy additional files/templates with permissions
+  ansible.builtin.include_tasks: tasks/10-files-individual.yml
   with_list: "{{ lihas_common_extra_files_with_perms[filegroupid]['files'] | default([]) }}"
   loop_control:
     loop_var: file

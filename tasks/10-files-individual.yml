@@ -11,6 +11,7 @@
     mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(664) }}"
     owner: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['owner'] | default('root') }}"
     group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
+    unsafe_writes: "{{ lihas_common_extra_files_with_perms[filegroupid]['unsafe'] | default(false) }}"
   register: resulttemplateperms
   tags:
     - templatesperms

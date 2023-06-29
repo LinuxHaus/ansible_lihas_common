@@ -86,13 +86,13 @@
 
 - name: Collect network entries from LIHASVARS
   ansible.builtin.set_fact:
-    network: "{{ network | default({}) | combine( LIHASVARS.network | default({}), recursive=true, list_merge='append_rp' ) }}"
+    network: "{{ network | default({}) | combine(LIHASVARS.network | default({}), recursive=true, list_merge='append_rp') }}"
   when: LIHASVARS.network is defined
   tags:
     - network
 - name: Collect network entries from configspaces
   ansible.builtin.set_fact:
-    network: "{{ network | default({}) | combine( hostvars[inventory_hostname][item]['config']['network'], recursive=true, list_merge='append_rp' ) }}"
+    network: "{{ network | default({}) | combine(hostvars[inventory_hostname][item]['config']['network'], recursive=true, list_merge='append_rp') }}"
     cacheable: false
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['network'] is defined
@@ -402,62 +402,13 @@
   become: "{{ lihas_become }}"
   tags:
     - software
-- name: Find addtional files/templates
-  ansible.builtin.set_fact:
-    lihas_common_extra_files: "{{ lihas_common_extra_files | default([]) + hostvars[inventory_hostname][item]['config']['files'] | default([]) }}"
-  loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['files'] is defined
-  tags:
-    - templates
-- name: "Copy additional files/templates: create directories"
-  ansible.builtin.file:
-    path: "/{{ item | dirname() }}"
-    state: directory
-    mode: "0755"
-  loop: "{{ lihas_common_extra_files | default([]) }}"
-  loop_control:
-    loop_var: item
-  when: lihas_common_extra_files is defined
-  tags:
-    - templates
-  become: "{{ lihas_become }}"
-- name: Copy additional files/templates
-  ansible.builtin.template:
-    src: "{{ item }}"
-    dest: "/{{ item }}"
-    mode: "0644"
-  loop: "{{ lihas_common_extra_files | default([]) }}"
-  loop_control:
-    loop_var: item
-  when: lihas_common_extra_files is defined
-  tags:
-    - templates
-  become: "{{ lihas_become }}"
-
-- name: Find addtional files/templates with permissions
-  ansible.builtin.set_fact:
-    lihas_common_extra_files_with_perms: >-
-      "{{ lihas_common_extra_files_with_perms | default([]) +
-      hostvars[inventory_hostname][item]['config']['fileswithpermissions'] | default([]) }}"
-  loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['fileswithpermissions'] is defined
-  tags:
-    - templatesperms
-- name: "Files: include tasks/10-files.yml"
-  ansible.builtin.include_tasks: tasks/10-files.yml
-  loop: "{{ lihas_common_extra_files_with_perms | default([]) }}"
-  loop_control:
-    loop_var: filegroup
-    index_var: filegroupid
-  tags:
-    - templatesperms
 
 # create groups
 - name: "Groups: find groups"
   ansible.builtin.set_fact:
     lihas_common_groups: >-
-      "{{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] |
-      default({}), recursive=true, list_merge='append_rp') }}"
+      {{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] |
+      default({}), recursive=true, list_merge='append_rp') }}
   loop: "{{ configspaces }}"
   when: hostvars[inventory_hostname][item]['config']['groups'] is defined
   tags:
@@ -493,6 +444,79 @@
     loop_var: user
   tags:
     - users
+- name: Find addtional files/templates
+  ansible.builtin.set_fact:
+    lihas_common_extra_files: "{{ lihas_common_extra_files | default([]) + hostvars[inventory_hostname][item]['config']['files'] | default([]) }}"
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['files'] is defined
+  tags:
+    - templates
+- name: "Copy additional files/templates: create directories"
+  ansible.builtin.file:
+    path: "/{{ item | dirname() }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ lihas_common_extra_files | default([]) }}"
+  loop_control:
+    loop_var: item
+  when: lihas_common_extra_files is defined
+  tags:
+    - templates
+  become: "{{ lihas_become }}"
+- name: Copy additional files/templates
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    mode: "0644"
+  loop: "{{ lihas_common_extra_files | default([]) }}"
+  loop_control:
+    loop_var: item
+  when: lihas_common_extra_files is defined
+  tags:
+    - templates
+  become: "{{ lihas_become }}"
+
+- name: Find addtional files/templates with permissions
+  ansible.builtin.set_fact:
+    lihas_common_extra_files_with_perms: >-
+      {{ lihas_common_extra_files_with_perms | default([]) +
+      hostvars[inventory_hostname][item]['config']['fileswithpermissions'] | default([]) }}
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['fileswithpermissions'] is defined
+  tags:
+    - templatesperms
+- name: Debug Create directories with permissions
+  ansible.builtin.debug:
+    var: lihas_common_extra_files_with_perms | default([])
+    verbosity: 1
+  tags:
+    - templatesperms
+- name: "Files: include tasks/10-files.yml"
+  ansible.builtin.include_tasks: tasks/10-files.yml
+  loop: "{{ lihas_common_extra_files_with_perms | default([]) }}"
+  loop_control:
+    loop_var: filegroup
+    index_var: filegroupid
+  tags:
+    - templatesperms
+
+- name: Find addtional binary files with permissions
+  ansible.builtin.set_fact:
+    lihas_common_extra_files_with_perms: >-
+      "{{ lihas_common_extra_files_binary | default([]) +
+      hostvars[inventory_hostname][item]['config']['filesbinary'] | default([]) }}"
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['filesbinary'] is defined
+  tags:
+    - templatesperms
+- name: "Files: include tasks/10-filesbinary.yml"
+  ansible.builtin.include_tasks: tasks/10-filesbinary.yml
+  loop: "{{ lihas_common_extra_files_binary | default([]) }}"
+  loop_control:
+    loop_var: filegroup
+    index_var: filegroupid
+  tags:
+    - templatesperms
 
 - name: "Populate service facts"
   ansible.builtin.service_facts:
@@ -503,13 +527,13 @@
     enabled: false
     state: stopped
     name: ssh.socket
-  when: ansible_facts.services["ssh"]["source"] == "systemd"
+  when: ansible_facts.services["ssh"]["source"] == "systemd" | default(false)
 - name: "Enable ssh.service with systemd"
   ansible.builtin.systemd_service:
     enabled: true
     state: started
     name: ssh.socket
-  when: ansible_facts.services["ssh"]["source"] == "systemd"
+  when: ansible_facts.services["ssh"]["source"] == "systemd" | default(false)
 
 - name: Include_role lihas_sysctl
   ansible.builtin.import_role:

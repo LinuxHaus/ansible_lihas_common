@@ -1,7 +1,7 @@
 - name: create/modify group
   ansible.builtin.group:
     name: "{{ group }}"
-    gid: "{{ lihas_common_groups[group].gid }}"
+    gid: "{{ lihas_common_groups[group].gid | default(omit) }}"
     state: "{{ lihas_common_groups[group].state | default('present') }}"
     system: "{{ lihas_common_groups[group].system | default(false) }}"
   tags:
