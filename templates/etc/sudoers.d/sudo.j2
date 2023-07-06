@@ -1,1 +1,8 @@
-{{ user }} ALL = (ALL) NOPASSWD: ALL
+{% if user.value.sudo | default(false) %}
+{{ user.key }} ALL = (ALL) NOPASSWD: ALL
+{% endif %}
+{% if user.value.sudo_selfservice | default(false) %}
+{{ user.key }} ALL = (ALL) NOPASSWD: /usr/bin/passwd {{ user.key }}
+{{ user.key }} ALL = (ALL) NOPASSWD: /usr/bin/smbpasswd -a {{ user.key }}
+{{ user.key }} ALL = (ALL) NOPASSWD: /usr/bin/smbpasswd {{ user.key }}
+{% endif %}

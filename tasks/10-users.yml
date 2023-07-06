@@ -1,24 +1,24 @@
 - name: Create/modify user
   ansible.builtin.user:
-    name: "{{ user }}"
-    uid: "{{ lihas_common_users[user].uid | default(omit) }}"
-    group: "{{ lihas_common_users[user].group | default(omit) }}"
-    shell: "{{ lihas_common_users[user].shell | default(omit) }}"
-    comment: "{{ lihas_common_users[user].comment | default(omit) }}"
-    home: "{{ lihas_common_users[user].home | default(omit) }}"
-    create_home: "{{ lihas_common_users[user].create_home | default(true) }}"
-    groups: "{{ lihas_common_users[user].groups | default(omit) }}"
-    state: "{{ lihas_common_users[user].state | default('present') }}"
+    name: "{{ user.key }}"
+    uid: "{{ user.value.uid | default(omit) }}"
+    group: "{{ user.value.group | default(omit) }}"
+    shell: "{{ user.value.shell | default(omit) }}"
+    comment: "{{ user.value.comment | default(omit) }}"
+    home: "{{ user.value.home | default(omit) }}"
+    create_home: "{{ user.value.create_home | default(true) }}"
+    groups: "{{ user.value.groups | default(omit) }}"
+    state: "{{ user.value.state | default('present') }}"
   tags:
     - users
   become: "{{ lihas_become }}"
 - name: "Home directory permissions in case we had previous content there"
   ansible.builtin.file:
-    path: "{{ lihas_common_users[user].home | default('/home/' + user) }}"
+    path: "{{ user.value.home | default('/home/' + user.key) }}"
     state: directory
-    owner: "{{ user }}"
+    owner: "{{ user.key }}"
     recurse: true
-  when: lihas_common_users[user].force_home_user | default(false)
+  when: user.value.force_home_user | default(false)
   tags:
     - users
   become: "{{ lihas_become }}"
@@ -26,9 +26,9 @@
   ansible.posix.authorized_key:
     key: "{{ sshkey }}"
     manage_dir: true
-    user: "{{ user }}"
-    path: "{{ lihas_common_users[user].home | default('/home/' + user) + '/.ssh/authorized_keys' }}"
-  loop: "{{ lihas_common_users[user].ssh_authorized_keys | default([]) }}"
+    user: "{{ user.key }}"
+    path: "{{ user.value.home | default('/home/' + user.key) + '/.ssh/authorized_keys' }}"
+  loop: "{{ user.value.ssh_authorized_keys | default([]) }}"
   loop_control:
     loop_var: sshkey
   tags:
@@ -36,7 +36,7 @@
   become: "{{ lihas_become }}"
 - name: "Add sudo"
   ansible.builtin.template:
-    dest: "/etc/sudoers.d/{{ user }}"
+    dest: "/etc/sudoers.d/{{ user.key }}"
     mode: "0440"
     owner: root
     group: root
@@ -45,5 +45,5 @@
   tags:
     - users
   become: "{{ lihas_become }}"
-  when: lihas_common_users[user].sudo | default(false)
+  when: user.value.sudo | default(false) or user.value.sudo_selfservice | default(false)
 ...

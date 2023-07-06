@@ -1,4 +1,4 @@
-- name: create/modify group
+- name: Create/modify group
   ansible.builtin.group:
     name: "{{ group }}"
     gid: "{{ lihas_common_groups[group].gid | default(omit) }}"

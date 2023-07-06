@@ -26,7 +26,7 @@
   ansible.builtin.shell:
     cmd: "{{ lihas_common_extra_filesbinary[filegroupid]['command'] }}"
   with_list: '{{ resulttemplateperms.results }}'
-  when: resulttemplateperms.changed and lihas_common_extra_filesbinary[filegroupid]['command'] is defined
+  when: lihas_common_extra_filesbinary[filegroupid]['command'] is defined and resulttemplateperms.changed
   tags:
     - templatesperms
   become: "{{ lihas_become }}"

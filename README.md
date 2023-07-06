@@ -112,6 +112,9 @@ selectivly run only parts:
 * X.config.users."username".shell: /bin/bash
 * X.config.users."username".ssh_authorized_keys: [ 'ssh-rsa abcd demo' ]
 * X.config.users."username".sudo: false
+    * sudo without password
+* X.config.users."username".sudo_selfservice: false
+    * sudo without password to use passwd, smbpasswd on own user
 
 ## Variables example
 ```
