@@ -243,7 +243,9 @@
     name:
       - extrepo
     state: present
-  when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"
+  when: >
+    ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" or
+    ansible_distribution_release == "bookworm"
   tags:
     - extrepo
     - software
@@ -256,7 +258,9 @@
 - name: Extrepo enable lihas
   ansible.builtin.command:
     cmd: /usr/bin/extrepo enable lihas
-  when: ( not statresult.stat.exists ) and ( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" )
+  when: >
+    ( not statresult.stat.exists ) and ( ansible_distribution_release == "buster" or
+    ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm" )
   changed_when: true
   tags:
     - extrepo

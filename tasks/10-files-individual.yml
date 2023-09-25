@@ -24,7 +24,6 @@
 - name: Run templatesperms, notifies
   ansible.builtin.shell:
     cmd: "{{ lihas_common_extra_files_with_perms[filegroupid]['command'] }}"
-  with_list: '{{ resulttemplateperms.results }}'
   when: resulttemplateperms.changed and lihas_common_extra_files_with_perms[filegroupid]['command'] is defined
   tags:
     - templatesperms
