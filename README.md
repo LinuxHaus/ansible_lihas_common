@@ -93,6 +93,8 @@ selectivly run only parts:
 * X.config.routes.'network/cidr'.metric
 * X.config.extrepo: []
     * extrepo Repositories to enable
+* X.config.software_repository.[].repo:
+    * debian repositories to enable
 * X.config.fileswithpermissions.[].files: []
     * files to copy
 * X.config.fileswithpermissions.[].directories: []
@@ -187,5 +189,8 @@ XY:
     software:
       debian:
         - lldpd
+    software_repository:
+      repo:
+        - "deb https://cloud.r-project.org/bin/linux/ubuntu {{ ansible_distribution_release }}-cran40/"
     files: []
 ```
