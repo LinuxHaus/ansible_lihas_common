@@ -143,7 +143,7 @@
   when: ansible_distribution_release == "buster"
   become: "{{ lihas_become }}"
 - name: Set_apt_update
-  ansible.builtin.set_fact:
+  ansible.builtin.set_fact: # noqa: no-handler
     apt_update: true
   when: result.changed
 - name: Enable buster-backports
@@ -155,7 +155,7 @@
   when: ansible_distribution_release == "buster"
   become: "{{ lihas_become }}"
 - name: Set_apt_update
-  ansible.builtin.set_fact:
+  ansible.builtin.set_fact: # noqa: no-handler
     apt_update: true
   when: result.changed
 - name: Backports get lower preference
@@ -167,7 +167,7 @@
   when: ansible_distribution_release == "buster"
   become: "{{ lihas_become }}"
 - name: Set_apt_update
-  ansible.builtin.set_fact:
+  ansible.builtin.set_fact: # noqa: no-handler
     apt_update: true
   when: result.changed
 - name: Create /etc/apt/preferences.d
@@ -210,7 +210,7 @@
   when: ansible_distribution_release == "buster"
   become: "{{ lihas_become }}"
 - name: Set_apt_update
-  ansible.builtin.set_fact:
+  ansible.builtin.set_fact: # noqa: no-handler
     apt_update: true
   when: result.changed
 - name: Apt update
@@ -238,94 +238,15 @@
     - etc/needrestart/conf.d/90-needrestart-lxc.conf
   when: ansible_virtualization_type == 'lxc'
   become: "{{ lihas_become }}"
-- name: Install software buster/bullseye only
-  ansible.builtin.apt:
-    name:
-      - extrepo
-    state: present
-  when: >
-    ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" or
-    ansible_distribution_release == "bookworm"
+# include tasks/enable_extrepo.yml
+- name: "Include tasks/enable_extrepo.yml"
+  ansible.builtin.include_tasks: tasks/enable_extrepo.yml
   tags:
     - extrepo
-    - software
-  become: "{{ lihas_become }}"
-- name: Extrepo enable lihas check presence
-  ansible.builtin.stat:
-    path: "{{ '/etc/apt/sources.list.d/extrepo_lihas.sources' }}"
-  register: statresult
-  become: "{{ lihas_become | default(no) }}"
-- name: Extrepo enable lihas
-  ansible.builtin.command:
-    cmd: /usr/bin/extrepo enable lihas
-  when: >
-    ( not statresult.stat.exists ) and ( ansible_distribution_release == "buster" or
-    ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm" )
-  changed_when: true
+- name: "Include enable_extra_apt_repositories.yml"
+  ansible.builtin.include_tasks: tasks/enable_extra_apt_repositories.yml
   tags:
-    - extrepo
-  become: "{{ lihas_become }}"
-- name: Extrepo Repositories to enable
-  ansible.builtin.set_fact:
-    lihas_extrepo: "{{ lihas_extrepo | default([]) + hostvars[inventory_hostname][item]['config']['extrepo'] }}"
-    cacheable: false
-  with_list: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['extrepo'] is defined
-  tags:
-    - extrepo
-  become: "{{ lihas_become }}"
-- name: Debug lihas_extrepo
-  ansible.builtin.debug:
-    var: lihas_extrepo
-    verbosity: 1
-  tags:
-    - extrepo
-  become: "{{ lihas_become }}"
-- name: Extrepo enable extra Repositories
-  ansible.builtin.command:
-    cmd: /usr/bin/extrepo enable {{ item }}
-  changed_when: false
-  register: resultloop
-  with_list: "{{ lihas_extrepo }}"
-  when: lihas_extrepo is defined
-  tags:
-    - extrepo
-  become: "{{ lihas_become }}"
-- name: Debug resultloop
-  ansible.builtin.debug:
-    var: resultloop
-    verbosity: 1
-  tags:
-    - extrepo
-- name: Collect extra apt repositories
-  ansible.builtin.set_fact:
-    lihas_apt_repository: "{{ lihas_apt_repository | default([]) + hostvars[inventory_hostname][item]['config']['software_repository'] }}"
-    cacheable: false
-  with_list: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['software_repository'] is defined
-  tags:
-    - software
-- name: "DEBUG: Enable extra apt repositories"
-  ansible.builtin.debug:
-    var: "{{ item }}"
-    verbosity: 2
-  with_list: "{{ lihas_apt_repository | default([]) }}"
-  tags:
-    - software
-- name: Enable extra apt repositories
-  ansible.builtin.apt_repository:
-    repo: "{{ item.repo }}"
-    state: "{{ item.state | default('present') }}"
-  with_list: "{{ lihas_apt_repository | default([]) }}"
-  tags:
-    - software
-  become: "{{ lihas_become }}"
-- name: Set_apt_update
-  ansible.builtin.set_fact:
-    apt_update: true
-#  when: '( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" ) and "repository already existed" not in result.stdout'
-  tags:
-    - extrepo
+    - apt_repositories
 - name: Apt update
   ansible.builtin.apt:
     update_cache: true
@@ -340,215 +261,30 @@
     cache_valid_time: 600
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   become: "{{ lihas_become }}"
-- name: Disable systemd-modules-load.service on lxc
-  ansible.builtin.systemd:
-    name: systemd-modules-load.service
-    masked: true
-  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{ lihas_become }}"
-- name: Disable systemd-journald-audit.socket on lxc
-  ansible.builtin.systemd:
-    name: systemd-journald-audit.socket
-    masked: true
-  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{ lihas_become }}"
-- name: Disable sys-kernel-config.mount on lxc
-  ansible.builtin.systemd:
-    name: sys-kernel-config.mount
-    masked: true
-  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{ lihas_become }}"
-- name: Disable sys-kernel-debug.mount on lxc
-  ansible.builtin.systemd:
-    name: sys-kernel-debug.mount
-    masked: true
-  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{ lihas_become }}"
-- name: Disable systemd-remount-fs.service on lxc
-  ansible.builtin.systemd:
-    name: systemd-remount-fs.service
-    masked: true
-  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
-  become: "{{ lihas_become }}"
-- name: Mark role lihas_common done
-  ansible.builtin.set_fact:
-    role_done_lihas_common: true
-  when: role_done_lihas_common is not defined
-
-- name: "Service lihas-routes: collect"
-  ansible.builtin.set_fact:
-    lihas_routes: "{{ lihas_routes | default({}) | combine(hostvars[inventory_hostname][item]['config']['routes'], recursive=true, list_merge='append_rp') }}"
-    cacheable: false
-  loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['routes'] is defined
+- name: "Include tasks/groups.yml"
+  ansible.builtin.include_tasks: tasks/groups.yml
+  tags:
+    - groups
+- name: "Include tasks/users.yml"
+  ansible.builtin.include_tasks: tasks/users.yml
+  tags:
+    - users
+- name: "Include lxc.yml"
+  ansible.builtin.include_tasks: tasks/lxc.yml
+  tags:
+    - lxc
+- name: "Include lihas-routes.yml"
+  ansible.builtin.include_tasks: tasks/lihas-routes.yml
   tags:
     - routes
-- name: "Service lihas-routes: template"
-  ansible.builtin.template:
-    src: "etc/systemd/system/routing-lihas.service"
-    dest: "/etc/systemd/system/routing-lihas.service"
-    mode: "0644"
-  when: lihas_routes is defined
-  notify: Restart routing-lihas
-  register: systemd
-  tags:
-    - routes
-  become: "{{ lihas_become }}"
-- name: "Service lihas-routes: reload_systemd"
-  ansible.builtin.systemd:
-    daemon_reload: true
-  when: lihas_routes is defined and systemd.changed
-  tags:
-    - routes
-  become: "{{ lihas_become }}"
-- name: "Service lihas-routes: service"
-  ansible.builtin.service:
-    name: routing-lihas
-    enabled: true
-  when: lihas_routes is defined
-  tags:
-    - routes
-  become: "{{ lihas_become }}"
-
-
-- name: Find additional software packages
-  ansible.builtin.set_fact:
-    lihas_common_extra_packages: >-
-      {{ lihas_common_extra_packages | default([]) +
-      hostvars[inventory_hostname][item]['config']['software']['debian'] | default([]) }}
-  loop: "{{ configspaces }}"
-- name: "DEBUG: additional software packages"
-  ansible.builtin.debug:
-    var: lihas_common_extra_packages
-    verbosity: 1
-- name: Install additional software for this host/group
-  ansible.builtin.apt:
-    name: "{{ lihas_common_extra_packages }}"
-    state: present
-  when: ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" ) and lihas_common_extra_packages is defined
-  become: "{{ lihas_become }}"
+- name: "Include additional_software.yml"
+  ansible.builtin.include_tasks: tasks/additional_software.yml
   tags:
     - software
-
-# create groups
-- name: "Groups: find groups"
-  ansible.builtin.set_fact:
-    lihas_common_groups: >-
-      {{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] |
-      default({}), recursive=true, list_merge='append_rp') }}
-  loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['groups'] is defined
-  tags:
-    - groups
-- name: "Debug groups"
-  ansible.builtin.debug:
-    var: lihas_common_groups
-    verbosity: 1
-  tags:
-    - groups
-- name: "Groups: include tasks/10-groups.yml"
-  ansible.builtin.include_tasks: tasks/10-groups.yml
-  loop: "{{ lihas_common_groups | default({}) | flatten(levels=1) }}"
-  loop_control:
-    loop_var: group
-  tags:
-    - groups
-
-# create users
-- name: "Users: find users"
-  ansible.builtin.set_fact:
-    lihas_common_users: |
-      {{ lihas_common_users | default({}) | combine(hostvars[inventory_hostname][item]['config']['users'] |
-      default({}), recursive=true, list_merge='append_rp') }}
-  loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['users'] is defined
-  tags:
-    - users
-- name: "Users: show users"
-  ansible.builtin.debug:
-    var: users
-    verbosity: 1
-- name: "Users: include tasks/10-users.yml"
-  ansible.builtin.include_tasks: tasks/10-users.yml
-  with_dict: "{{ lihas_common_users | default({}) }}"
-  loop_control:
-    loop_var: user
-  tags:
-    - users
-- name: Find addtional files/templates
-  ansible.builtin.set_fact:
-    lihas_common_extra_files: "{{ lihas_common_extra_files | default([]) + hostvars[inventory_hostname][item]['config']['files'] | default([]) }}"
-  loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['files'] is defined
+- name: "Include tasks/templates.yml"
+  ansible.builtin.include_tasks: tasks/templates.yml
   tags:
     - templates
-- name: "Copy additional files/templates: create directories"
-  ansible.builtin.file:
-    path: "/{{ item | dirname() }}"
-    state: directory
-    mode: "0755"
-  loop: "{{ lihas_common_extra_files | default([]) }}"
-  loop_control:
-    loop_var: item
-  when: lihas_common_extra_files is defined
-  tags:
-    - templates
-  become: "{{ lihas_become }}"
-- name: Copy additional files/templates
-  ansible.builtin.template:
-    src: "{{ item }}"
-    dest: "/{{ item }}"
-    mode: "0644"
-  loop: "{{ lihas_common_extra_files | default([]) }}"
-  loop_control:
-    loop_var: item
-  when: lihas_common_extra_files is defined
-  tags:
-    - templates
-  become: "{{ lihas_become }}"
-
-- name: Find addtional files/templates with permissions
-  ansible.builtin.set_fact:
-    lihas_common_extra_files_with_perms: >-
-      {{ lihas_common_extra_files_with_perms | default([]) +
-      hostvars[inventory_hostname][item]['config']['fileswithpermissions'] | default([]) }}
-  loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['fileswithpermissions'] is defined
-  tags:
-    - templatesperms
-- name: Debug Create directories with permissions
-  ansible.builtin.debug:
-    var: lihas_common_extra_files_with_perms | default([])
-    verbosity: 1
-  tags:
-    - templatesperms
-- name: "Files: include tasks/10-files.yml"
-  ansible.builtin.include_tasks: tasks/10-files.yml
-  loop: "{{ lihas_common_extra_files_with_perms | default([]) }}"
-  loop_control:
-    loop_var: filegroup
-    index_var: filegroupid
-  tags:
-    - templatesperms
-
-- name: Find addtional binary files with permissions
-  ansible.builtin.set_fact:
-    lihas_common_extra_files_with_perms: >-
-      "{{ lihas_common_extra_files_binary | default([]) +
-      hostvars[inventory_hostname][item]['config']['filesbinary'] | default([]) }}"
-  loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['filesbinary'] is defined
-  tags:
-    - templatesperms
-- name: "Files: include tasks/10-filesbinary.yml"
-  ansible.builtin.include_tasks: tasks/10-filesbinary.yml
-  loop: "{{ lihas_common_extra_files_binary | default([]) }}"
-  loop_control:
-    loop_var: filegroup
-    index_var: filegroupid
-  tags:
-    - templatesperms
-
 - name: "Populate service facts"
   ansible.builtin.service_facts:
 

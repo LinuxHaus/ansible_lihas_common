@@ -1,0 +1,36 @@
+---
+- name: "Service lihas-routes: collect"
+  ansible.builtin.set_fact:
+    lihas_routes: "{{ lihas_routes | default({}) | combine(hostvars[inventory_hostname][item]['config']['routes'], recursive=true, list_merge='append_rp') }}"
+    cacheable: false
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['routes'] is defined
+  tags:
+    - routes
+- name: "Service lihas-routes: template"
+  ansible.builtin.template:
+    src: "etc/systemd/system/routing-lihas.service"
+    dest: "/etc/systemd/system/routing-lihas.service"
+    mode: "0644"
+  when: lihas_routes is defined
+  notify: Restart routing-lihas
+  register: systemd
+  tags:
+    - routes
+  become: "{{ lihas_become }}"
+- name: "Service lihas-routes: reload_systemd"
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: lihas_routes is defined and systemd.changed
+  tags:
+    - routes
+  become: "{{ lihas_become }}"
+- name: "Service lihas-routes: service"
+  ansible.builtin.service:
+    name: routing-lihas
+    enabled: true
+  when: lihas_routes is defined
+  tags:
+    - routes
+  become: "{{ lihas_become }}"
+...

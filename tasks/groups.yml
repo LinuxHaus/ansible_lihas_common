@@ -1,0 +1,25 @@
+---
+# create groups
+- name: "Groups: find groups"
+  ansible.builtin.set_fact:
+    lihas_common_groups: >-
+      {{ lihas_common_groups | default({}) | combine(hostvars[inventory_hostname][item]['config']['groups'] |
+      default({}), recursive=true, list_merge='append_rp') }}
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['groups'] is defined
+  tags:
+    - groups
+- name: "Debug groups"
+  ansible.builtin.debug:
+    var: lihas_common_groups
+    verbosity: 1
+  tags:
+    - groups
+- name: "Groups: include tasks/10-groups.yml"
+  ansible.builtin.include_tasks: tasks/10-groups.yml
+  loop: "{{ lihas_common_groups | default({}) | flatten(levels=1) }}"
+  loop_control:
+    loop_var: group
+  tags:
+    - groups
+...

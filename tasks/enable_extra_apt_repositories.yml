@@ -1,0 +1,31 @@
+---
+- name: Collect extra apt repositories
+  ansible.builtin.set_fact:
+    lihas_apt_repository: "{{ lihas_apt_repository | default([]) + hostvars[inventory_hostname][item]['config']['software_repository'] }}"
+    cacheable: false
+  with_list: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['software_repository'] is defined
+  tags:
+    - apt_repositories
+- name: "DEBUG: Enable extra apt repositories"
+  ansible.builtin.debug:
+    var: "{{ item }}"
+    verbosity: 2
+  with_list: "{{ lihas_apt_repository | default([]) }}"
+  tags:
+    - apt_repositories
+- name: Enable extra apt repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ item.repo }}"
+    state: "{{ item.state | default('present') }}"
+  with_list: "{{ lihas_apt_repository | default([]) }}"
+  tags:
+    - apt_repositories
+  become: "{{ lihas_become }}"
+- name: Set_apt_update
+  ansible.builtin.set_fact:
+    apt_update: true
+#  when: '( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" ) and "repository already existed" not in result.stdout'
+  tags:
+    - apt_repositories
+...

@@ -17,15 +17,16 @@
     - templatesperms
   become: "{{ lihas_become }}"
 - name: "DEBUG: resulttemplateperms"
-  ansible.builtin.debug:
+  ansible.builtin.debug: # noqa: no-handler
     var: resulttemplateperms
   tags:
     - templatesperms
   when: resulttemplateperms.changed
 - name: Run templatesperms, notifies
-  ansible.builtin.shell:
+  ansible.builtin.shell: # noqa: command-instead-of-shell
     cmd: "{{ lihas_common_extra_filesbinary[filegroupid]['command'] }}"
   with_list: '{{ resulttemplateperms.results }}'
+  changed_when: false
   when: lihas_common_extra_filesbinary[filegroupid]['command'] is defined and resulttemplateperms.changed
   tags:
     - templatesperms

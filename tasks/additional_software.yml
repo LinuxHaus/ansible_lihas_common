@@ -1,0 +1,24 @@
+---
+- name: Find additional software packages
+  ansible.builtin.set_fact:
+    lihas_common_extra_packages: >-
+      {{ lihas_common_extra_packages | default([]) +
+      hostvars[inventory_hostname][item]['config']['software']['debian'] | default([]) }}
+  loop: "{{ configspaces }}"
+  tags:
+    - software
+- name: "DEBUG: additional software packages"
+  ansible.builtin.debug:
+    var: lihas_common_extra_packages
+    verbosity: 1
+  tags:
+    - software
+- name: Install additional software for this host/group
+  ansible.builtin.apt:
+    name: "{{ lihas_common_extra_packages }}"
+    state: present
+  when: ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" ) and lihas_common_extra_packages is defined
+  become: "{{ lihas_become }}"
+  tags:
+    - software
+...

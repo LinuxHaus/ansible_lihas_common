@@ -1,0 +1,23 @@
+---
+# create users
+- name: "Users: find users"
+  ansible.builtin.set_fact:
+    lihas_common_users: |
+      {{ lihas_common_users | default({}) | combine(hostvars[inventory_hostname][item]['config']['users'] |
+      default({}), recursive=true, list_merge='append_rp') }}
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['users'] is defined
+  tags:
+    - users
+- name: "Users: show users"
+  ansible.builtin.debug:
+    var: users
+    verbosity: 1
+- name: "Users: include tasks/10-users.yml"
+  ansible.builtin.include_tasks: tasks/10-users.yml
+  with_dict: "{{ lihas_common_users | default({}) }}"
+  loop_control:
+    loop_var: user
+  tags:
+    - users
+...

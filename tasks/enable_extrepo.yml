@@ -1,0 +1,68 @@
+---
+- name: Install software buster/bullseye only
+  ansible.builtin.apt:
+    name:
+      - extrepo
+    state: present
+  when: >
+    ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" or
+    ansible_distribution_release == "bookworm"
+  tags:
+    - extrepo
+  become: "{{ lihas_become }}"
+- name: Extrepo enable lihas check presence
+  ansible.builtin.stat:
+    path: "{{ '/etc/apt/sources.list.d/extrepo_lihas.sources' }}"
+  register: statresult
+  tags:
+    - extrepo
+  become: "{{ lihas_become | default(no) }}"
+- name: Extrepo enable lihas
+  ansible.builtin.command:
+    cmd: /usr/bin/extrepo enable lihas
+  when: >
+    ( not statresult.stat.exists ) and ( ansible_distribution_release == "buster" or
+    ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm" )
+  changed_when: true
+  tags:
+    - extrepo
+  become: "{{ lihas_become }}"
+- name: Extrepo Repositories to enable
+  ansible.builtin.set_fact:
+    lihas_extrepo: "{{ lihas_extrepo | default([]) + hostvars[inventory_hostname][item]['config']['extrepo'] }}"
+    cacheable: false
+  with_list: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['extrepo'] is defined
+  tags:
+    - extrepo
+  become: "{{ lihas_become }}"
+- name: Debug lihas_extrepo
+  ansible.builtin.debug:
+    var: lihas_extrepo
+    verbosity: 1
+  tags:
+    - extrepo
+  become: "{{ lihas_become }}"
+- name: Extrepo enable extra Repositories
+  ansible.builtin.command:
+    cmd: /usr/bin/extrepo enable {{ item }}
+  changed_when: false
+  register: resultloop
+  with_list: "{{ lihas_extrepo }}"
+  when: lihas_extrepo is defined
+  tags:
+    - extrepo
+  become: "{{ lihas_become }}"
+- name: Debug resultloop
+  ansible.builtin.debug:
+    var: resultloop
+    verbosity: 1
+  tags:
+    - extrepo
+- name: Set_apt_update
+  ansible.builtin.set_fact:
+    apt_update: true
+#  when: '( ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" ) and "repository already existed" not in result.stdout'
+  tags:
+    - extrepo
+...

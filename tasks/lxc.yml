@@ -1,0 +1,36 @@
+---
+- name: Disable systemd-modules-load.service on lxc
+  ansible.builtin.systemd:
+    name: systemd-modules-load.service
+    masked: true
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
+  become: "{{ lihas_become }}"
+- name: Disable systemd-journald-audit.socket on lxc
+  ansible.builtin.systemd:
+    name: systemd-journald-audit.socket
+    masked: true
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
+  become: "{{ lihas_become }}"
+- name: Disable sys-kernel-config.mount on lxc
+  ansible.builtin.systemd:
+    name: sys-kernel-config.mount
+    masked: true
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
+  become: "{{ lihas_become }}"
+- name: Disable sys-kernel-debug.mount on lxc
+  ansible.builtin.systemd:
+    name: sys-kernel-debug.mount
+    masked: true
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
+  become: "{{ lihas_become }}"
+- name: Disable systemd-remount-fs.service on lxc
+  ansible.builtin.systemd:
+    name: systemd-remount-fs.service
+    masked: true
+  when: ansible_virtualization_type == 'lxc' and ansible_service_mgr == 'systemd'
+  become: "{{ lihas_become }}"
+- name: Mark role lihas_common done
+  ansible.builtin.set_fact:
+    role_done_lihas_common: true
+  when: role_done_lihas_common is not defined
+...

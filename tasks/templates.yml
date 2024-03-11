@@ -1,0 +1,33 @@
+---
+- name: Find addtional files/templates
+  ansible.builtin.set_fact:
+    lihas_common_extra_files: "{{ lihas_common_extra_files | default([]) + hostvars[inventory_hostname][item]['config']['files'] | default([]) }}"
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['files'] is defined
+  tags:
+    - templates
+- name: "Copy additional files/templates: create directories"
+  ansible.builtin.file:
+    path: "/{{ item | dirname() }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ lihas_common_extra_files | default([]) }}"
+  loop_control:
+    loop_var: item
+  when: lihas_common_extra_files is defined
+  tags:
+    - templates
+  become: "{{ lihas_become }}"
+- name: Copy additional files/templates
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    mode: "0644"
+  loop: "{{ lihas_common_extra_files | default([]) }}"
+  loop_control:
+    loop_var: item
+  when: lihas_common_extra_files is defined
+  tags:
+    - templates
+  become: "{{ lihas_become }}"
+...
