@@ -113,9 +113,10 @@
     - network
   become: "{{ lihas_become }}"
 - name: Protect /etc/network/interfaces on Proxmox/LXC
-  ansible.builtin.copy:
-    dest: /etc/network/.pve-ignore.interfaces
-    src: /dev/null
+  ansible.builtin.file:
+    path: /etc/network/.pve-ignore.interfaces
+    state: touch
+    access_time: preserve
     mode: "0644"
   when: ansible_virtualization_type == 'lxc' and network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   tags:

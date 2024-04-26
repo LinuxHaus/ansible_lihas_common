@@ -22,7 +22,7 @@
     cmd: /usr/bin/extrepo enable lihas
   when: >
     ( not statresult.stat.exists ) and ( ansible_distribution_release == "buster" or
-    ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm" )
+    ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm" ) and ( lihas_enable_repo | default(false) )
   changed_when: true
   tags:
     - extrepo

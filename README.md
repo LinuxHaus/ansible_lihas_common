@@ -91,6 +91,8 @@ selectivly run only parts:
 * X.config.network.bond.{}.primary:
 * X.config.routes.'network/cidr'.gateway
 * X.config.routes.'network/cidr'.metric
+* lihas_enable_repo: boolen
+    * enable lihas extrepo, default false
 * X.config.extrepo: []
     * extrepo Repositories to enable
 * X.config.software_repository.[].repo:

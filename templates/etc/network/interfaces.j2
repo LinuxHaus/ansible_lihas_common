@@ -60,22 +60,23 @@ iface {{ i.key }} inet {{ i.value.config_type }}
 {%         if hostvars[inventory_hostname].network.bridges[i.key] is defined %}
 {%           if hostvars[inventory_hostname].network.bridges[i.key].bridge_type == "linux" %}
 {%             if hostvars[inventory_hostname].network.bridges[i.key].slaves is defined %}
-  bridge_ports{% for port in hostvars[inventory_hostname].network.bridges[i.key].slaves %} {{ port }}{%           endfor%}
+  bridge-ports{% for port in hostvars[inventory_hostname].network.bridges[i.key].slaves %} {{ port }}{%           endfor%}
 
 {%             else %}
-  bridge_ports none
+  bridge-ports none
 {%             endif %}
-  bridge_stp {{ hostvars[inventory_hostname].network.bridges[i.key].stp | default("off") }}
-  bridge_fd      {{ hostvars[inventory_hostname].network.bridges[i.key].fd | default (0) }}
-  bridge_maxwait {{ hostvars[inventory_hostname].network.bridges[i.key].maxwait | default (0) }}
+  bridge-stp {{ hostvars[inventory_hostname].network.bridges[i.key].stp | default("off") }}
+  bridge-fd      {{ hostvars[inventory_hostname].network.bridges[i.key].fd | default (0) }}
+  bridge-maxwait {{ hostvars[inventory_hostname].network.bridges[i.key].maxwait | default (0) }}
 {%             if hostvars[inventory_hostname].network.bridges[i.key].vlan_aware | default ('yes') == 'yes' %}
-  bridge_vlan_aware yes
+  bridge-vlan-aware yes
+  bridge-vids 2-4094
 {%             endif %}
 {%           endif %}
 {%         endif %}
 {%         if hostvars[inventory_hostname].network.vlans[i.key] is defined %}
   vlan-raw-device {{ hostvars[inventory_hostname].network.vlans[i.key].rawdevice }}
-  pre-up ip link add link {{ hostvars[inventory_hostname]['network']['vlans'][i.key].rawdevice }} name {{ i.key }} type vlan id {{ hostvars[inventory_hostname]['network']['vlans'][i.key].vlanid }} || true
+  vlan-id {{ hostvars[inventory_hostname]['network']['vlans'][i.key].vlanid }}
 {%         endif %}
 {%         if hostvars[inventory_hostname].network.bond[i.key] is defined %}
 {%           if hostvars[inventory_hostname].network.bond[i.key].slaves is defined %}
