@@ -15,7 +15,7 @@
     - software
 - name: Activate additional software repositories
   ansible.builtin.apt_repository:
-    repo: "{{ lihas_common_extra_repositories }}"
+    repo: "{{ item.repo }}"
     state: present
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   loop: lihas_common_extra_repositories | default([])
