@@ -1,5 +1,5 @@
 ---
-- name: Find addtional files/templates
+- name: Find additional files/templates
   ansible.builtin.set_fact:
     lihas_common_extra_files: "{{ lihas_common_extra_files | default([]) + hostvars[inventory_hostname][item]['config']['files'] | default([]) }}"
   loop: "{{ configspaces }}"

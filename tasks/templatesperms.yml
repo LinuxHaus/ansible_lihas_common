@@ -1,5 +1,5 @@
 ---
-- name: Find addtional files/templates with permissions
+- name: Find additional files/templates with permissions
   ansible.builtin.set_fact:
     lihas_common_extra_files_with_perms: >-
       {{ lihas_common_extra_files_with_perms | default([]) +
@@ -22,7 +22,7 @@
     index_var: filegroupid
   tags:
     - templatesperms
-- name: Find addtional binary files with permissions
+- name: Find additional binary files with permissions
   ansible.builtin.set_fact:
     lihas_common_extra_files_with_perms: >-
       "{{ lihas_common_extra_files_binary | default([]) +
