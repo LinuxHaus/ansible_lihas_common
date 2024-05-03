@@ -278,6 +278,10 @@
   ansible.builtin.include_tasks: tasks/lihas-routes.yml
   tags:
     - routes
+- name: "Include additional_software_repositories.yml"
+  ansible.builtin.include_tasks: tasks/additional_software_repositories.yml
+  tags:
+    - software
 - name: "Include additional_software.yml"
   ansible.builtin.include_tasks: tasks/additional_software.yml
   tags:

@@ -1,0 +1,25 @@
+---
+- name: Find additional software repositories
+  ansible.builtin.set_fact:
+    lihas_common_extra_repositories: >-
+      {{ lihas_common_extra_repositories | default([]) +
+      hostvars[inventory_hostname][item]['config']['repository']['debian'] | default([]) }}
+  loop: "{{ configspaces }}"
+  tags:
+    - software
+- name: "DEBUG: additional software repositories"
+  ansible.builtin.debug:
+    var: lihas_common_extra_repositories
+    verbosity: 1
+  tags:
+    - software
+- name: Activate additional software repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ lihas_common_extra_repositories }}"
+    state: present
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+  loop: lihas_common_extra_repositories | default([])
+  become: "{{ lihas_become }}"
+  tags:
+    - software
+...
