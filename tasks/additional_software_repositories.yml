@@ -18,7 +18,7 @@
     repo: "{{ item.repo }}"
     state: present
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  loop: lihas_common_extra_repositories | default([])
+  loop: "{{ lihas_common_extra_repositories | default([]) }}"
   become: "{{ lihas_become }}"
   tags:
     - software
