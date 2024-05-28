@@ -22,21 +22,4 @@
     index_var: filegroupid
   tags:
     - templatesperms
-- name: Find additional binary files with permissions
-  ansible.builtin.set_fact:
-    lihas_common_extra_files_with_perms: >-
-      "{{ lihas_common_extra_files_binary | default([]) +
-      hostvars[inventory_hostname][item]['config']['filesbinary'] | default([]) }}"
-  loop: "{{ configspaces }}"
-  when: hostvars[inventory_hostname][item]['config']['filesbinary'] is defined
-  tags:
-    - templatesperms
-- name: "Files: include tasks/10-filesbinary.yml"
-  ansible.builtin.include_tasks: tasks/10-filesbinary.yml
-  loop: "{{ lihas_common_extra_files_binary | default([]) }}"
-  loop_control:
-    loop_var: filegroup
-    index_var: filegroupid
-  tags:
-    - templatesperms
 ...

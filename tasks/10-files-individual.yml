@@ -1,10 +1,10 @@
 ---
 - name: "DEBUG: file"
   ansible.builtin.debug:
-    var: file
+    msg: "filegroupid: {{ filegroupid }} filegroup: {{ filegroup }} file: {{ file }}"
   tags:
     - templatesperms
-- name: Copy additional files/templates with permissions
+- name: Copy additional files/templates with permissions as template
   ansible.builtin.template:
     src: "{{ file }}"
     dest: "/{{ file }}"
@@ -13,18 +13,47 @@
     group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
     unsafe_writes: "{{ lihas_common_extra_files_with_perms[filegroupid]['unsafe'] | default(false) }}"
   register: resulttemplateperms
+  when: not filegroup.binary | default(true)
   tags:
     - templatesperms
   become: "{{ lihas_become }}"
-- name: "DEBUG: resulttemplateperms"
+- name: "DEBUG: resulttemplateperms template"
   ansible.builtin.debug:
     var: resulttemplateperms
   tags:
     - templatesperms
-- name: Run templatesperms, notifies
+- name: Run templatesperms, notifies template
   ansible.builtin.shell: # noqa: command-instead-of-shell
-    cmd: "{{ lihas_common_extra_files_with_perms[filegroupid]['command'] }}"
-  when: resulttemplateperms.changed and lihas_common_extra_files_with_perms[filegroupid]['command'] is defined
+    cmd: "{{ item }}"
+  loop: "{{ lihas_common_extra_files_with_perms[filegroupid]['command'] | default([]) }}"
+  when: resulttemplateperms.changed
+  changed_when: false
+  tags:
+    - templatesperms
+  become: "{{ lihas_become }}"
+- name: Copy additional files/templates with permissions verbatim
+  ansible.builtin.copy:
+    src: "{{ file }}"
+    dest: "/{{ file }}"
+    mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(444) }}"
+    owner: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['owner'] | default('root') }}"
+    group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
+    unsafe_writes: "{{ lihas_common_extra_files_with_perms[filegroupid]['unsafe'] | default(false) }}"
+  register: resulttemplateperms
+  when: filegroup.binary | default(false)
+  tags:
+    - templatesperms
+  become: "{{ lihas_become }}"
+- name: "DEBUG: resulttemplateperms verbatim"
+  ansible.builtin.debug:
+    var: resulttemplateperms
+  tags:
+    - templatesperms
+- name: Run templatesperms, notifies verbatim
+  ansible.builtin.shell: # noqa: command-instead-of-shell
+    cmd: "{{ item }}"
+  loop: "{{ lihas_common_extra_files_with_perms[filegroupid]['command'] | default([]) }}"
+  when: resulttemplateperms.changed
   changed_when: false
   tags:
     - templatesperms
