@@ -45,23 +45,21 @@
 - name: Reset_apt_update
   ansible.builtin.set_fact:
     apt_update: false
-- name: "Set default locale to {{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
-  ansible.builtin.lineinfile:
-    dest: "/etc/default/locale"
-    regexp: "LANG="
-    line: "LANG={{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
+- name: "Set default debconf locale to {{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
+  ansible.builtin.debconf:
+    name: locales
+    question: locales/default_environment_locale
+    value: "{{ locales_default_environment_locale | default('de_DE.UTF-8') }}"
+    vtype: select
   notify: Reconfigure locales
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   become: "{{ lihas_become }}"
-- name: "Set to generate locales {{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
-  ansible.builtin.lineinfile:
-    mode: "0644"
-    path: /etc/locale.gen
-    line: '{{ item }} \2'
-    regexp: "^(# |){{ item }} (.*)"
-    backrefs: true
-    state: present
-  loop: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
+- name: "Set to generate debconf locales {{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
+  ansible.builtin.debconf:
+    name: locales
+    question: locales/locales_to_be_generated
+    value: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
+    vtype: multiselect
   notify: Reconfigure locales
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   become: "{{ lihas_become }}"
@@ -117,6 +115,7 @@
     path: /etc/network/.pve-ignore.interfaces
     state: touch
     access_time: preserve
+    modification_time: preserve
     mode: "0644"
   when: ansible_virtualization_type == 'lxc' and network.interfaces is defined and ( ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" )
   tags:
@@ -306,8 +305,19 @@
     state: started
     name: ssh.socket
   when: ansible_facts.services["ssh"]["source"] == "systemd" | default(false)
-
 - name: Include_role lihas_sysctl
   ansible.builtin.import_role:
     name: lihas_sysctl
   when: lihas_sysctl_done is not defined
+- name: Collect systemd services to enable
+  ansible.builtin.set_fact:
+    systemd_service_enable: "{{ systemd_service_enable | default([]) + hostvars[inventory_hostname][item]['config']['systemd']['service']['enabled'] | default ([])  }}"
+    cacheable: false
+  when: hostvars[inventory_hostname][item]['config']['systemd'] is defined and hostvars[inventory_hostname][item]['config']['systemd']['service'] is defined
+  loop: "{{ configspaces }}"
+- name: "Enable systemd services"
+  ansible.builtin.systemd_service:
+    enabled: true
+    state: started
+    name: item
+  with_list: "{{ systemd_service_enable | default([]) }}"

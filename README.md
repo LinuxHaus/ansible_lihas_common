@@ -123,9 +123,7 @@ selectivly run only parts:
 ## Variables example
 ```
 locales_default_environment_locale: de_DE.UTF-8
-locales_locales_to_be_generated:
-  - de_DE.UTF-8 UTF-8
-  - en_US.UTF-8 UTF-8
+locales_locales_to_be_generated: de_DE.UTF-8 UTF-8, en_US.UTF-8 UTF-8
 tzdata_areas: Europe
 tzdata_zones_europe: Berlin
 XY:
@@ -194,5 +192,8 @@ XY:
     software_repository:
       repo:
         - "deb https://cloud.r-project.org/bin/linux/ubuntu {{ ansible_distribution_release }}-cran40/"
+    systemd:
+      service:
+        enabled: []
     files: []
 ```
