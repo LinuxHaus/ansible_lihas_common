@@ -1,8 +1,8 @@
 ---
 - name: Reconfigure locales
-  ansible.builtin.command: LANG=C dpkg-reconfigure -f noninteractive locales
+  ansible.builtin.shell: LANG=C dpkg-reconfigure -f noninteractive locales
 - name: Reconfigure tzdata
-  ansible.builtin.command: LANG=C dpkg-reconfigure -f noninteractive tzdata
+  ansible.builtin.shell: LANG=C dpkg-reconfigure -f noninteractive tzdata
 - name: Restart routing-lihas
   ansible.builtin.service:
     name: routing-lihas
