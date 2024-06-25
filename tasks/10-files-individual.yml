@@ -13,7 +13,7 @@
     group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
     unsafe_writes: "{{ lihas_common_extra_files_with_perms[filegroupid]['unsafe'] | default(false) }}"
   register: resulttemplateperms
-  when: not filegroup.binary | default(true)
+  when: not filegroup.binary | default(false)
   tags:
     - templatesperms
   become: "{{ lihas_become }}"
