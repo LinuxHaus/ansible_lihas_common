@@ -58,7 +58,7 @@
   ansible.builtin.debconf:
     name: locales
     question: locales/locales_to_be_generated
-    value: "{{ locales_locales_to_be_generated | default(['de_DE.UTF-8', 'en_US.UTF-8']) }}"
+    value: "{{ locales_locales_to_be_generated | default('de_DE.UTF-8 UTF-8, en_US.UTF-8 UTF-8') }}"
     vtype: multiselect
   notify: Reconfigure locales
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
