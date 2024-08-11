@@ -11,8 +11,19 @@
     - users
 - name: "Users: show users"
   ansible.builtin.debug:
-    var: users
+    var: lihas_common_users
     verbosity: 1
+  tags:
+    - users
+- name: "Users: show users, flattened"
+  ansible.builtin.debug:
+    var: lihas_common_users | flatten(levels=1)
+    verbosity: 1
+  tags:
+    - users
+#- name: "Users: filter wanted only"
+#  ansible.builtin.set_fact:
+#
 - name: "Users: include tasks/10-users.yml"
   ansible.builtin.include_tasks: tasks/10-users.yml
   with_dict: "{{ lihas_common_users | default({}) }}"

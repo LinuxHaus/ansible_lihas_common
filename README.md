@@ -122,6 +122,10 @@ selectivly run only parts:
     * sudo without password
 * X.config.users."username".sudo_selfservice: false
     * sudo without password to use passwd, smbpasswd on own user
+* lihas_users_filter: []
+    * only create these users
+* TODO: lihas_users_filter_exclusive: false
+    * remove existing users that would be created without a `lihas_users_filter`
 
 ## Variables example
 ```
