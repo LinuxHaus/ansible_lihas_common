@@ -76,10 +76,12 @@
     line: 'en_US.UTF-8 UTF-8'
     notify: "Reconfigure locales"
 - name: "Set /etc/default/locale to de_DE.UTF-8 manually"
-  ansible.builtin.lineinfile:
-    path: /etc/default/locale
-    regexp: '^LANG='
-    line: 'LANG="de_DE.UTF-8"'
+  ansible.builtin.template:
+    src: etc/default/locale
+    dest: /etc/default/locale
+    group: "root"
+    owner: "root"
+    mode: 644
     notify: Reconfigure locales
 - name: "Set tzdata area to {{ tzdata_areas | default('Europe') }}"
   ansible.builtin.debconf:
