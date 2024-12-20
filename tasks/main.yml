@@ -244,7 +244,7 @@
 - name: Install software general
   ansible.builtin.apt:
     state: present
-    name: ['aptitude', 'etckeeper', 'fail2ban', 'locales', 'needrestart', 'rsync', 'screen', 'tzdata', 'vim']
+    name: ['aptitude', 'etckeeper', 'fail2ban', 'locales', 'needrestart', 'rsync', 'screen', 'sudo', 'tzdata', 'vim']
   when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
   become: "{{ lihas_become }}"
   tags:
