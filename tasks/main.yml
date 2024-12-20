@@ -68,13 +68,13 @@
     path: /etc/locale.gen
     search_string: '# de_DE.UTF-8 UTF-8'
     line: 'de_DE.UTF-8 UTF-8'
-    notify: "Reconfigure locales"
+  notify: "Reconfigure locales"
 - name: "Set /etc/locale.gen for en_US.UTF-8 manually"
   ansible.builtin.lineinfile:
     path: /etc/locale.gen
     search_string: '# en_US.UTF-8 UTF-8'
     line: 'en_US.UTF-8 UTF-8'
-    notify: "Reconfigure locales"
+  notify: "Reconfigure locales"
 - name: "Set /etc/default/locale to de_DE.UTF-8 manually"
   ansible.builtin.template:
     src: etc/default/locale
@@ -82,7 +82,7 @@
     group: "root"
     owner: "root"
     mode: 644
-    notify: Reconfigure locales
+  notify: Reconfigure locales
 - name: "Set tzdata area to {{ tzdata_areas | default('Europe') }}"
   ansible.builtin.debconf:
     name: tzdata
