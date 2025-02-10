@@ -1,12 +1,15 @@
 ---
 - name: Reconfigure locales
   ansible.builtin.shell: LANG=C dpkg-reconfigure -f noninteractive locales
+  become: "{{ lihas_become }}"
 - name: Reconfigure tzdata
   ansible.builtin.shell: LANG=C dpkg-reconfigure -f noninteractive tzdata
+  become: "{{ lihas_become }}"
 - name: Restart routing-lihas
   ansible.builtin.service:
     name: routing-lihas
     state: restarted
   tags:
     - routes
+  become: "{{ lihas_become }}"
 ...
