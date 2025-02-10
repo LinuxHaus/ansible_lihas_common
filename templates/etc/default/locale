@@ -1,1 +1,1 @@
-LANG="de_DE.UTF-8"
+LANG={{ locales_default_environment_locale | default('de_DE.UTF-8') }}
