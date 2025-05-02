@@ -134,7 +134,12 @@ iface {{ i.key }} inet6 {{ i.value.config6_type }}
 {%       endif %}
 
 {%     endfor %}
+{%     for i in hostvars[inventory_hostname].network.interfaces_extra | default([]) %}
+{{ i }}
+{%     endfor %}
 {%   endif %}
 {% endif %}
 
+{% if lihas_network_interface_source_default | default(true) %}
 source /etc/network/interfaces.d/*
+{% endif %}

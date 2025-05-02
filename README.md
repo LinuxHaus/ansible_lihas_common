@@ -45,6 +45,8 @@ selectivly run only parts:
 * templatesperms: copy extra templates with permissions
 
 ## Variables
+* lihas_network_interface_source_default:
+    * add `source /etc/network/interfaces.d/*`, default true
 * X.config.hosts.IP[]
     * X: string, use host or groupname
     * IP: ip-address
@@ -53,6 +55,8 @@ selectivly run only parts:
     * if present, overwrite /etc/network/interfaces, supports bridges, vlans and interfaces as such
 * X.config.network.interfaces_rename.{}:
     * rename interface in key to value
+* X.config.network.interfaces_extra.[]:
+    * add lines at the end of /etc/network/interfaces
 * X.config.network.interfaces.{}.auto
 * X.config.network.interfaces.{}.config_type
 * X.config.network.interfaces.{}.config6_type
