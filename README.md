@@ -111,7 +111,7 @@ selectivly run only parts:
     * owner, group, mode (octal or quoted)
 * X.config.fileswithpermissions.[].unsafe_writes:
     * allow unsafe writes in ansible.builtin.templates
-* X.config.fileswithpermissions.[].commandi.[]:
+* X.config.fileswithpermissions.[].command.[]:
     * commands to run after changes
 * X.config.fileswithpermissions.[].binary:
     * true: copy as binary file, false: copy as template
