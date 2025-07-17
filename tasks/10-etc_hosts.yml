@@ -1,5 +1,5 @@
 ---
-- name: "/etc/hosts: {{ configspace }}"
+- name: "/etc/hosts: {{ configgroup }}"
   ansible.builtin.include_tasks: 10-etc_hosts_entry.yml
   loop: "{{ hostvars[inventory_hostname][configgroup]['config'].hosts | default({}) | flatten(levels=1) }}"
   loop_control:
