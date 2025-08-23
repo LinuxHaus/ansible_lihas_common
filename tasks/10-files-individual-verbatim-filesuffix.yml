@@ -1,0 +1,23 @@
+- name: Copy additional files/templates with permissions verbatim block
+  block:
+    - name: Copy additional files/templates with permissions verbatim
+      ansible.builtin.copy:
+        src: "{{ file }}"
+        dest: "/{{ file }}"
+        mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(444) }}"
+        owner: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['owner'] | default('root') }}"
+        group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
+        unsafe_writes: "{{ lihas_common_extra_files_with_perms[filegroupid]['unsafe'] | default(false) }}"
+      register: resulttemplateperms
+      when:
+        - not templatedone
+      become: "{{ lihas_become }}"
+      tags:
+        - templatesperms
+    - name: Set templatedone fact
+      ansible.builtin.set_fact:
+        templatedone: true
+  rescue:
+    - name: Template not found, next
+      ansible.builtin.set_fact:
+        templatedone: false

@@ -115,6 +115,9 @@ selectivly run only parts:
     * commands to run after changes
 * X.config.fileswithpermissions.[].binary:
     * true: copy as binary file, false: copy as template
+* X.config.fileswithpermissions.[].use_group_suffix:
+    * true: source file has suffix according to configgroup, suffix, including `.` will be removed, default false.
+    * configgroup will be iterated in reverse order
 * X.config.users."username".uid: 1234
 * X.config.users."username".comment: "Karl Koch"
 * X.config.users."username".group: primarygroup

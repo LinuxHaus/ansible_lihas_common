@@ -4,6 +4,19 @@
     msg: "filegroupid: {{ filegroupid }} filegroup: {{ filegroup }} file: {{ file }}"
   tags:
     - templatesperms
+- name: Initialize templatedone
+  ansible.builtin.set_fact:
+    templatedone: false
+    cacheable: false
+- name: "Copy additional files/templates with permissions as template with filesuffix"
+  ansible.builtin.include_tasks: tasks/10-files-individual-template-filesuffix.yml
+  with_list: "{{ configspaces | reverse }}"
+  loop_control:
+    loop_var: filesuffix
+  when:
+    - lihas_common_extra_files_with_perms[filegroupid]['use_group_suffix'] | default(false)
+    - not filegroup.binary | default(false)
+    - not templatedone
 - name: Copy additional files/templates with permissions as template
   ansible.builtin.template:
     src: "{{ file }}"
@@ -13,7 +26,9 @@
     group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
     unsafe_writes: "{{ lihas_common_extra_files_with_perms[filegroupid]['unsafe'] | default(false) }}"
   register: resulttemplateperms
-  when: not filegroup.binary | default(false)
+  when:
+    - not filegroup.binary | default(false)
+    - not templatedone
   tags:
     - templatesperms
   become: "{{ lihas_become }}"
@@ -31,6 +46,15 @@
   tags:
     - templatesperms
   become: "{{ lihas_become }}"
+- name: "Copy additional files/templates with permissions verbatim with filesuffix"
+  ansible.builtin.include_tasks: tasks/10-files-individual-verbatim-filesuffix.yml
+  with_list: "{{ configspaces | reverse }}"
+  loop_control:
+    loop_var: filesuffix
+  when:
+    - lihas_common_extra_files_with_perms[filegroupid]['use_group_suffix'] | default(false)
+    - filegroup.binary | default(false)
+    - not templatedone
 - name: Copy additional files/templates with permissions verbatim
   ansible.builtin.copy:
     src: "{{ file }}"
@@ -40,7 +64,9 @@
     group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
     unsafe_writes: "{{ lihas_common_extra_files_with_perms[filegroupid]['unsafe'] | default(false) }}"
   register: resulttemplateperms
-  when: filegroup.binary | default(false)
+  when:
+    - filegroup.binary | default(false)
+    - not templatedone
   tags:
     - templatesperms
   become: "{{ lihas_become }}"
