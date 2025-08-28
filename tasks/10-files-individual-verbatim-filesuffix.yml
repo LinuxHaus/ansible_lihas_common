@@ -2,7 +2,7 @@
   block:
     - name: Copy additional files/templates with permissions verbatim
       ansible.builtin.copy:
-        src: "{{ file }}"
+        src: "{{ file }}.{{ filesuffix }}"
         dest: "/{{ file }}"
         mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(444) }}"
         owner: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['owner'] | default('root') }}"
