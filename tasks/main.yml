@@ -169,26 +169,10 @@
   ansible.builtin.set_fact: # noqa: no-handler
     apt_update: true
   when: result.changed
-- name: Enable buster-backports
-  ansible.builtin.template:
-    src: etc/apt/sources.list.d/buster-backports.list
-    dest: /etc/apt/sources.list.d/buster-backports.list
-    mode: "0644"
-  register: result
-  when: ansible_distribution_release == "buster"
-  become: "{{ lihas_become }}"
 - name: Set_apt_update
   ansible.builtin.set_fact: # noqa: no-handler
     apt_update: true
   when: result.changed
-- name: Backports get lower preference
-  ansible.builtin.copy:
-    src: etc/apt/preferences.d/buster_backports.pref
-    dest: /etc/apt/preferences.d/buster_backports.pref
-    mode: "0644"
-  register: result
-  when: ansible_distribution_release == "buster"
-  become: "{{ lihas_become }}"
 - name: Set_apt_update
   ansible.builtin.set_fact: # noqa: no-handler
     apt_update: true
@@ -224,14 +208,6 @@
     - name: Rescue apt update, run apt update
       ansible.builtin.apt:
         update_cache: true
-- name: If wireguard is used, use from backports
-  ansible.builtin.copy:
-    src: etc/apt/preferences.d/wireguard.pref
-    dest: /etc/apt/preferences.d/wireguard.pref
-    mode: "0644"
-  register: result
-  when: ansible_distribution_release == "buster"
-  become: "{{ lihas_become }}"
 - name: Set_apt_update
   ansible.builtin.set_fact: # noqa: no-handler
     apt_update: true
