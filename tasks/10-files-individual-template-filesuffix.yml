@@ -21,3 +21,5 @@
     - name: Template not found, next
       ansible.builtin.set_fact:
         templatedone: false
+  tags:
+    - templatesperms

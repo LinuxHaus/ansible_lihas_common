@@ -8,6 +8,8 @@
   ansible.builtin.set_fact:
     templatedone: false
     cacheable: false
+  tags:
+    - templatesperms
 - name: "Copy additional files/templates with permissions as template with filesuffix"
   ansible.builtin.include_tasks: tasks/10-files-individual-template-filesuffix.yml
   with_list: "{{ configspaces | reverse }}"
@@ -17,6 +19,8 @@
     - lihas_common_extra_files_with_perms[filegroupid]['use_group_suffix'] | default(false)
     - not filegroup.binary | default(false)
     - not templatedone
+  tags:
+    - templatesperms
 - name: Copy additional files/templates with permissions as template
   ansible.builtin.template:
     src: "{{ file }}"
@@ -55,6 +59,8 @@
     - lihas_common_extra_files_with_perms[filegroupid]['use_group_suffix'] | default(false)
     - filegroup.binary | default(false)
     - not templatedone
+  tags:
+    - templatesperms
 - name: Copy additional files/templates with permissions verbatim
   ansible.builtin.copy:
     src: "{{ file }}"
