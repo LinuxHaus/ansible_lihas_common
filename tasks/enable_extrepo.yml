@@ -6,7 +6,8 @@
     state: present
   when: >
     ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye" or
-    ansible_distribution_release == "bookworm"
+    ansible_distribution_release == "bookworm" or ansible_distribution_release == "trixie" or
+    ansible_distribution_release == "forky" or ansible_distribution_release == "sid"
   tags:
     - extrepo
   become: "{{ lihas_become }}"
