@@ -169,14 +169,6 @@
   ansible.builtin.set_fact: # noqa: no-handler
     apt_update: true
   when: result.changed
-- name: Set_apt_update
-  ansible.builtin.set_fact: # noqa: no-handler
-    apt_update: true
-  when: result.changed
-- name: Set_apt_update
-  ansible.builtin.set_fact: # noqa: no-handler
-    apt_update: true
-  when: result.changed
 - name: Create /etc/apt/preferences.d
   ansible.builtin.file:
     state: directory
@@ -210,8 +202,7 @@
         update_cache: true
 - name: Set_apt_update
   ansible.builtin.set_fact: # noqa: no-handler
-    apt_update: true
-  when: result.changed
+    apt_update: false
 - name: Apt update
   ansible.builtin.apt:
     update_cache: true
@@ -228,6 +219,28 @@
   become: "{{ lihas_become }}"
   tags:
     - software
+- name: Init extrepo_repositories
+  ansible.builtin.set_fact:
+    extrepo_repositories: []
+- name: Collect extrepo Repositories from configspaces
+  ansible.builtin.set_fact:
+    extrepo_repositories: "{{ extrepo_repositories | default([]) | combine(hostvars[inventory_hostname][item]['config']['extrepo'], list_merge='append_rp') }}"
+    cacheable: false
+  loop: "{{ configspaces }}"
+  when: hostvars[inventory_hostname][item]['config']['extrepo'] is defined
+  tags:
+    - extrepo
+- name: "DEBUG: extrepo_repositories"
+  ansible.builtin.debug:
+    var: extrepo_repositories
+    verbosity: 1
+  tags:
+    - always
+- name: Install extrepo if needed
+  ansible.builtin.apt:
+    state: present
+    name: extrepo
+  when: extrepo_repositories | length > 0
 - name: File etc/needrestart/conf.d/90-needrestart-lxc.conf
   ansible.builtin.copy:
     src: "{{ item }}"
