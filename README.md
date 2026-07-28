@@ -105,6 +105,8 @@ selectivly run only parts:
     * files to copy
 * X.config.fileswithpermissions.[].directories: []
     * directories to create
+* X.config.fileswithpermissions.[].force:
+    * overwrite existing files, default true
 * X.config.fileswithpermissions.[].perm.owner:
 * X.config.fileswithpermissions.[].perm.group:
 * X.config.fileswithpermissions.[].perm.mode:

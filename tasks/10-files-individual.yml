@@ -25,6 +25,7 @@
   ansible.builtin.template:
     src: "{{ file }}"
     dest: "/{{ file }}"
+    force: "{{ lihas_common_extra_files_with_perms[filegroupid]['force'] | default(true) }}"
     mode: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['mode'] | default(444) }}"
     owner: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['owner'] | default('root') }}"
     group: "{{ lihas_common_extra_files_with_perms[filegroupid]['perm']['group'] | default('root') }}"
